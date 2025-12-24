@@ -41,3 +41,8 @@ logs/
 .env
 .env.production
 .env.development
+
+# Tools
+migrate
+LICENSE
+README.md
