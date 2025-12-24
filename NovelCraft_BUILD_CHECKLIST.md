@@ -7,14 +7,14 @@ Only check an item when it is fully complete and verified.
 
 ## 🧱 Foundations (M0)
 
-- [ ] Monorepo created with correct folder structure
-- [ ] Root README.md added
-- [ ] .gitignore configured
-- [ ] Docker Compose for Postgres + pgvector works
-- [ ] Database reachable via DATABASE_URL
-- [ ] Go module initialised
-- [ ] Echo server boots
-- [ ] /api/health returns ok
+- [x] Monorepo created with correct folder structure
+- [x] Root README.md added
+- [x] .gitignore configured
+- [x] Docker Compose for Postgres + pgvector works
+- [x] Database reachable via DATABASE_URL
+- [x] Go module initialised
+- [x] Echo server boots
+- [x] /api/health returns ok
 - [ ] CI workflow builds frontend and backend
 
 ---
