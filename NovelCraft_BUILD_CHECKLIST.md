@@ -46,19 +46,19 @@ Only check an item when it is fully complete and verified.
 
 ## ✍️ Chapters (M1)
 
-- [ ] chapters table migrated
-- [ ] GET chapters by project (ordered)
-- [ ] POST chapter appends correctly
-- [ ] GET chapter returns full content
-- [ ] PATCH chapter updates content
-- [ ] Chapter reorder endpoint works transactionally
-- [ ] Word count calculated server-side
+- [x] chapters table migrated
+- [x] GET chapters by project (ordered)
+- [x] POST chapter appends correctly
+- [x] GET chapter returns full content
+- [x] PATCH chapter updates content
+- [x] Chapter reorder endpoint works transactionally
+- [x] Word count calculated server-side
 - [ ] Autosave stable under rapid edits
 
 Optional:
-- [ ] chapter_revisions table migrated
-- [ ] Revision snapshot creation works
-- [ ] Revision restore works
+- [x] chapter_revisions table migrated
+- [x] Revision snapshot creation works
+- [x] Revision restore works
 
 ---
 
