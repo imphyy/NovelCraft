@@ -1,12 +1,18 @@
 package httpapi
 
 import (
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+
+	"github.com/imphyy/NovelCraft/backend/internal/auth"
 )
 
-func NewServer() *echo.Echo {
+func NewServer(db *pgxpool.Pool) *echo.Echo {
 	e := echo.New()
+
+	// Validator
+	e.Validator = NewValidator()
 
 	// Middleware
 	e.Use(middleware.Recover())
@@ -23,8 +29,12 @@ func NewServer() *echo.Echo {
 		AllowHeaders:     []string{"Content-Type", "Authorization"},
 	}))
 
+	// Services
+	authService := auth.NewService(db)
+	authHandler := auth.NewHandler(authService)
+
 	// Routes
-	setupRoutes(e)
+	setupRoutes(e, authHandler, authService)
 
 	return e
 }

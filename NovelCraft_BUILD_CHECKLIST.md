@@ -15,21 +15,21 @@ Only check an item when it is fully complete and verified.
 - [x] Go module initialised
 - [x] Echo server boots
 - [x] /api/health returns ok
-- [ ] CI workflow builds frontend and backend
+- [x] CI workflow builds frontend and backend
 
 ---
 
 ## 🔐 Authentication (M1)
 
-- [ ] users table migrated
-- [ ] sessions table migrated
-- [ ] Password hashing implemented
-- [ ] Session cookie configured correctly
-- [ ] POST /auth/register works
-- [ ] POST /auth/login works
-- [ ] GET /auth/me works
-- [ ] POST /auth/logout invalidates session
-- [ ] RequireAuth middleware blocks unauthenticated access
+- [x] users table migrated
+- [x] sessions table migrated
+- [x] Password hashing implemented
+- [x] Session cookie configured correctly
+- [x] POST /auth/register works
+- [x] POST /auth/login works
+- [x] GET /auth/me works
+- [x] POST /auth/logout invalidates session
+- [x] RequireAuth middleware blocks unauthenticated access
 
 ---
 

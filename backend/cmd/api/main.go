@@ -1,22 +1,32 @@
 package main
 
 import (
+	"context"
 	"log"
-	"os"
 
+	"github.com/imphyy/NovelCraft/backend/internal/config"
+	"github.com/imphyy/NovelCraft/backend/internal/db"
 	"github.com/imphyy/NovelCraft/backend/internal/httpapi"
 )
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+	ctx := context.Background()
+
+	// Load config
+	cfg := config.Load()
+
+	// Connect to database
+	dbPool, err := db.Connect(ctx, cfg.DatabaseURL)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
+	defer dbPool.Close()
 
-	server := httpapi.NewServer()
+	// Create server
+	server := httpapi.NewServer(dbPool)
 
-	log.Printf("Starting server on port %s", port)
-	if err := server.Start(":" + port); err != nil {
+	log.Printf("Starting server on port %s", cfg.Port)
+	if err := server.Start(":" + cfg.Port); err != nil {
 		log.Fatal(err)
 	}
 }
