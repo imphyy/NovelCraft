@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/imphyy/NovelCraft/backend/internal/auth"
+	"github.com/imphyy/NovelCraft/backend/internal/chapters"
 	"github.com/imphyy/NovelCraft/backend/internal/projects"
 )
 
@@ -37,8 +38,11 @@ func NewServer(db *pgxpool.Pool) *echo.Echo {
 	projectsService := projects.NewService(db)
 	projectsHandler := projects.NewHandler(projectsService)
 
+	chaptersService := chapters.NewService(db)
+	chaptersHandler := chapters.NewHandler(chaptersService)
+
 	// Routes
-	setupRoutes(e, authHandler, authService, projectsHandler)
+	setupRoutes(e, authHandler, authService, projectsHandler, chaptersHandler)
 
 	return e
 }
