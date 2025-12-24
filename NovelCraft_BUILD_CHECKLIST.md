@@ -35,12 +35,12 @@ Only check an item when it is fully complete and verified.
 
 ## 📚 Projects (M1)
 
-- [ ] projects table migrated
-- [ ] GET /projects lists only owned projects
-- [ ] POST /projects creates project
-- [ ] GET /projects/:id enforces ownership
-- [ ] PATCH /projects/:id updates fields
-- [ ] DELETE /projects/:id removes project
+- [x] projects table migrated
+- [x] GET /projects lists only owned projects
+- [x] POST /projects creates project
+- [x] GET /projects/:id enforces ownership
+- [x] PATCH /projects/:id updates fields
+- [x] DELETE /projects/:id removes project
 
 ---
 
