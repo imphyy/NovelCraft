@@ -1,0 +1,7 @@
+{
+  "terminal": {
+    "shellPath": "wsl.exe",
+    "shellArgs": ["-d", "Ubuntu"]
+  },
+  "customInstructions": "Before responding, read and follow the guidelines in NovelCraft_CLAUDE_SYSTEM_PROMPT.md, NovelCraft_AI_EXECUTION_GUIDE.md, NovelCraft_README.md, and NovelCraft_BUILD_CHECKLIST.md"
+}
