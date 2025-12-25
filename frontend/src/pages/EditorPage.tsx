@@ -3,7 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { projectsAPI, chaptersAPI } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { RewriteModal } from '../components/RewriteModal';
-import { AppShell } from '../components/AppShell';
+import { AppShell } from '../components/layout/AppShell';
+import { Book } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Project {
   id: string;
@@ -169,35 +171,44 @@ export default function EditorPage() {
     );
   }
 
-  const leftSidebar = (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="font-semibold text-foreground">Chapters</h2>
+  const leftContext = (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+          <Book className="h-3 w-3" />
+          Chapters
+        </h2>
         <button
           onClick={() => setShowNewChapter(true)}
-          className="text-accent hover:text-accent/90 text-sm font-medium"
+          className="text-xs text-primary hover:underline font-medium"
         >
           + New
         </button>
       </div>
 
       {showNewChapter && (
-        <form onSubmit={handleCreateChapter} className="mb-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreateChapter();
+          }}
+          className="mb-4 p-2 bg-muted/50 rounded-lg border border-border shadow-sm"
+        >
           {error && (
-            <div className="text-xs text-destructive mb-2">{error}</div>
+            <div className="text-[10px] text-destructive mb-2">{error}</div>
           )}
           <input
             type="text"
             value={newChapterTitle}
             onChange={(e) => setNewChapterTitle(e.target.value)}
             placeholder="Chapter title"
-            className="w-full px-2 py-1 text-sm border border-border rounded mb-2 bg-background focus:outline-none focus:ring-2 focus:ring-accent"
+            className="w-full px-2 py-1.5 text-xs border border-border rounded mb-2 bg-background focus:outline-none focus:ring-1 focus:ring-primary"
             autoFocus
           />
           <div className="flex gap-2">
             <button
               type="submit"
-              className="flex-1 px-2 py-1 text-xs bg-accent text-accent-foreground rounded hover:bg-accent/90"
+              className="flex-1 px-2 py-1 text-[10px] bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
             >
               Create
             </button>
@@ -208,7 +219,7 @@ export default function EditorPage() {
                 setNewChapterTitle('');
                 setError('');
               }}
-              className="flex-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
+              className="flex-1 px-2 py-1 text-[10px] text-muted-foreground hover:bg-background rounded transition-colors"
             >
               Cancel
             </button>
@@ -217,7 +228,7 @@ export default function EditorPage() {
       )}
 
       {chapters.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">
+        <p className="text-xs text-muted-foreground text-center py-8 italic">
           No chapters yet
         </p>
       ) : (
@@ -226,14 +237,15 @@ export default function EditorPage() {
             <button
               key={chapter.id}
               onClick={() => setSelectedChapter(chapter)}
-              className={`w-full text-left px-3 py-2 rounded text-sm ${
+              className={cn(
+                "w-full text-left px-3 py-2 rounded text-xs transition-all",
                 selectedChapter?.id === chapter.id
-                  ? 'bg-accent/10 text-accent font-medium'
-                  : 'text-foreground hover:bg-muted'
-              }`}
+                  ? "bg-accent text-accent-foreground font-medium shadow-sm ring-1 ring-border"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
             >
               <div className="font-medium truncate">{chapter.title}</div>
-              <div className="text-xs text-muted-foreground mt-1">
+              <div className="text-[10px] opacity-70 mt-0.5">
                 {chapter.wordCount} words
               </div>
             </button>
@@ -243,53 +255,37 @@ export default function EditorPage() {
     </div>
   );
 
-  const rightSidebar = selectedChapter ? (
-    <div className="p-4">
-      <h2 className="font-semibold text-foreground mb-4">AI Tools</h2>
-      <button
-        onClick={handleOpenRewrite}
-        className="w-full px-4 py-2 text-sm bg-accent text-accent-foreground rounded-lg hover:bg-accent/90"
-      >
-        ✨ AI Rewrite
-      </button>
-    </div>
-  ) : null;
-
   return (
     <AppShell
-      projectName={project?.name}
-      onBack={() => navigate('/projects')}
-      onWiki={() => navigate(`/projects/${projectId}/wiki`)}
-      onLogout={handleLogout}
-      saving={saving}
-      wordCount={selectedChapter?.wordCount}
-      leftSidebar={leftSidebar}
-      rightSidebar={rightSidebar}
+      title={project?.name}
+      leftContext={leftContext}
+      main={
+        selectedChapter ? (
+          <div className="h-full flex flex-col">
+            <div className="border-b border-border/50 pb-4 mb-6">
+              <h2 className="text-2xl font-bold text-foreground font-serif">
+                {selectedChapter.title}
+              </h2>
+              {saving && <span className="text-[10px] text-muted-foreground animate-pulse ml-2 italic">Saving...</span>}
+            </div>
+            <div className="flex-1">
+              <textarea
+                ref={textareaRef}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="w-full h-[65vh] text-foreground resize-none focus:outline-none bg-transparent font-serif leading-relaxed text-lg md:text-xl placeholder:opacity-30"
+                placeholder="Once upon a time..."
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-20">
+            <Book className="h-12 w-12 mb-4 opacity-20" />
+            <p>Select a chapter or create a new one to start writing</p>
+          </div>
+        )
+      }
     >
-      {selectedChapter ? (
-        <div className="h-full flex flex-col bg-card rounded-md shadow-paper">
-          <div className="border-b border-border px-6 py-3">
-            <h2 className="text-lg font-semibold text-foreground">
-              {selectedChapter.title}
-            </h2>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <textarea
-              ref={textareaRef}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full h-full px-6 py-4 text-foreground resize-none focus:outline-none bg-card font-serif"
-              placeholder="Start writing..."
-              style={{ fontSize: '16px', lineHeight: '1.6' }}
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="h-full flex items-center justify-center text-muted-foreground">
-          Select a chapter or create a new one to start writing
-        </div>
-      )}
-
       {/* Rewrite Modal */}
       {selectedChapter && (
         <RewriteModal

@@ -1,0 +1,198 @@
+can you suggest a good layout and style guide for the website, things like side bars, headers and stuff like that? I dont know what its called
+
+You’re thinking of “information architecture” + “layout system” (and a bit of a design system). Here’s a solid, writer-friendly layout that fits your parchment theme and the features you planned (chapters, wiki, AI panel).
+
+Layout recommendation: “Editor-first, panels around it”
+
+Think of it like Scrivener/Obsidian: the writing stays central, everything else is a panel.
+
+Overall shell (desktop)
+
+Top header (thin): global actions + project switch + search + theme toggle
+
+Left sidebar (primary nav): Projects / Chapters / Wiki / Search
+
+Center (main canvas): editor or wiki page
+
+Right sidebar (assistant): Claude / AI tools / citations / quick actions
+
+This works great because your app has “content” (writing/wiki) plus “helpers” (AI, links, metadata).
+
+Recommended screen layouts
+1) Project Home
+
+Header: Project name, export button, settings
+Left sidebar: Chapters list (with status + word count)
+Main: “Continue writing” + recent chapters + notes
+Right panel (optional): AI “Ask my novel” + recent citations
+
+2) Chapter Editor (your core screen)
+
+Left sidebar: chapter list + create chapter + reorder
+Main: editor page (paper sheet)
+Right panel: AI tools (rewrite/expand), “Ask” results with citations, wiki mentions
+
+Suggested sub-panels in the right sidebar:
+
+Tabs: Ask | Rewrite | Notes | Citations
+
+Or accordion sections
+
+3) Wiki
+
+Left sidebar: wiki type filter + search + page list
+Main: wiki entry (paper sheet)
+Right panel: backlinks, mentions, AI “draft entry / summarise”
+
+4) Search
+
+Main: results grouped (Chapters / Wiki)
+Right panel: preview snippet + “open in editor” + “ask AI about this result”
+
+“Parchment” style guide that won’t get in the way of writing
+Visual rules
+
+Background (app): darker parchment base
+
+Surface (content): lighter “page” sheet in the center
+
+Borders: soft, warm borders (not grey)
+
+Shadows: gentle “paper lift” shadows
+
+Typography: serif for content, sans for UI chrome
+
+Hierarchy rules (important)
+
+Your main editor text should be the most visually calm.
+
+UI elements should be quiet:
+
+low contrast icons
+
+subtle separators
+
+muted backgrounds
+
+Spacing rules
+
+Use a consistent spacing scale (Tailwind):
+
+padding: p-4 / p-6 / p-8
+
+gaps: gap-2 / gap-4 / gap-6
+
+Give the editor generous margins:
+
+max width: max-w-3xl or max-w-4xl
+
+Borders
+
+Prefer 1px soft borders:
+
+border border-border
+
+Avoid heavy outlines.
+
+Shadows
+
+Use one main shadow for the page:
+
+shadow-paper (from your config)
+
+Rounded corners
+
+For panels: rounded-xl
+
+For the page sheet: rounded-md (slightly less rounded feels more “paper”)
+
+Component layout patterns (what to use where)
+Header (thin, always visible)
+
+Include:
+
+Project selector (dropdown)
+
+Global search (input)
+
+Theme toggle
+
+Profile/menu
+
+“Export” button (only when relevant)
+
+Keep it 48–56px height.
+
+Left sidebar (navigation / lists)
+
+Width: 280–320px
+
+Contains:
+
+primary nav (Projects, Chapters, Wiki)
+
+context list (chapters list or wiki list)
+
+Add a collapse button (mobile + focus mode)
+
+Main content (“paper sheet”)
+
+A single central card:
+
+max width for readability
+
+large padding
+
+serif font
+
+subtle texture optional
+
+Right sidebar (AI / metadata)
+
+Width: 360–420px
+
+Tabs or accordion sections:
+
+Ask (Q&A + citations)
+
+Rewrite tools
+
+Backlinks / mentions
+
+Notes
+
+This sidebar is where your AI work lives.
+
+Mobile / small screen rules
+
+On mobile, sidebars become drawers:
+
+left nav: hamburger menu
+
+right AI panel: a “sparkles” button that opens a drawer
+
+Main content stays the parchment page.
+
+Concrete “layout spec” (copyable)
+
+If you want a single sentence spec to follow:
+
+Three-column layout: left sidebar for navigation and lists, center parchment page for content, right sidebar for AI and metadata; thin header with global actions; drawers on mobile.
+
+What I’d build first (so it feels good fast)
+
+Chapter editor layout
+
+Wiki layout
+
+AI right sidebar tabs
+
+Search page
+
+If you want, I can generate:
+
+a single React layout component (AppShell) using shadcn/ui + Tailwind
+
+plus ChapterEditor page skeleton that matches this exact layout and parchment theme.
+
+Say: “Generate AppShell + ChapterEditor skeleton” and I’ll paste the code.

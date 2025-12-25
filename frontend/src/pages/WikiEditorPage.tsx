@@ -3,6 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { wikiAPI } from '../api/client';
 import type { WikiPage, Backlink, Mention } from '../types/wiki';
 import { WIKI_PAGE_TYPES } from '../types/wiki';
+import { AppShell } from '../components/layout/AppShell';
+import { Button } from '@/components/ui/button';
+import { Link, MessageSquare, Tag, Plus, RefreshCw, Library } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function WikiEditorPage() {
   const { projectId, pageId } = useParams<{ projectId: string; pageId: string }>();
@@ -137,6 +141,81 @@ export default function WikiEditorPage() {
     }
   };
 
+  const rightPanel = (
+    <div className="flex flex-col h-full bg-card/40">
+      <div className="p-4 border-b border-border/50 bg-muted/20">
+        <h3 className="text-sm font-bold flex items-center gap-2 text-foreground/80">
+          <Link className="h-4 w-4 opacity-70" />
+          Connections
+        </h3>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        {/* Rebuild Links */}
+        <div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-xs bg-card/50"
+            onClick={handleRebuildLinks}
+            disabled={rebuilding}
+          >
+            <RefreshCw className={cn("h-3 w-3 mr-2", rebuilding && "animate-spin")} />
+            {rebuilding ? 'Rebuilding...' : 'Rebuild Links'}
+          </Button>
+          <p className="text-[10px] text-muted-foreground/60 mt-1 text-center">Scan all content for [[wiki links]]</p>
+        </div>
+
+        {/* Backlinks */}
+        <div>
+          <h4 className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-3 px-1">Backlinks ({backlinks.length})</h4>
+          {backlinks.length === 0 ? (
+            <p className="text-xs text-muted-foreground/50 italic px-1">No pages link here yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {backlinks.map((link, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    if (link.sourceType === 'wiki_page') {
+                      navigate(`/projects/${projectId}/wiki/${link.sourceId}`);
+                    } else {
+                      navigate(`/projects/${projectId}`);
+                    }
+                  }}
+                  className="w-full text-left p-2.5 rounded-md border border-border/40 bg-card/30 hover:bg-muted/40 hover:border-border/60 transition-all group shadow-sm"
+                >
+                  <div className="text-xs font-medium group-hover:text-primary transition-colors">{link.sourceTitle}</div>
+                  <div className="text-[10px] text-muted-foreground/60 mt-1 capitalize">{link.sourceType.replace('_', ' ')}</div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Mentions */}
+        <div>
+          <h4 className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-3 px-1">Mentioned in Chapters ({mentions.length})</h4>
+          {mentions.length === 0 ? (
+            <p className="text-xs text-muted-foreground/50 italic px-1">No mentions found.</p>
+          ) : (
+            <div className="space-y-2">
+              {mentions.map((mention, idx) => (
+                <div
+                  key={idx}
+                  className="p-2.5 rounded-md border border-border/40 bg-card/30 hover:bg-muted/40 transition-all cursor-pointer shadow-sm"
+                  onClick={() => navigate(`/projects/${projectId}/editor`)}
+                >
+                  <div className="text-xs font-medium">{mention.chapterTitle}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -156,160 +235,61 @@ export default function WikiEditorPage() {
   const pageTypeInfo = WIKI_PAGE_TYPES.find(t => t.value === page.pageType);
 
   return (
-    <div className="h-full flex bg-gray-50">
-      {/* Main Editor */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-3xl">{pageTypeInfo?.icon}</span>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900">{page.title}</h1>
-              <p className="text-sm text-gray-500">{pageTypeInfo?.label}</p>
+    <AppShell
+      title={page.title}
+      rightPanel={rightPanel}
+      main={
+        <div className="h-full flex flex-col">
+          <div className="flex items-center justify-between mb-6 border-b border-border/50 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">{pageTypeInfo?.icon}</span>
+              <div>
+                <h1 className="text-3xl font-bold font-serif">{page.title}</h1>
+                <p className="text-xs text-muted-foreground uppercase tracking-widest">{pageTypeInfo?.label}</p>
+              </div>
             </div>
-            {saving && <span className="text-sm text-gray-500">Saving...</span>}
+            {saving && <span className="text-[10px] text-muted-foreground animate-pulse">Saving...</span>}
           </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-2 mb-6">
             {page.tags.map(tag => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 text-sm rounded"
-              >
+              <span key={tag} className="flex items-center gap-1 px-2 py-1 bg-muted rounded-full text-[10px] font-medium text-muted-foreground">
+                <Tag className="h-3 w-3" />
                 {tag}
-                <button
-                  onClick={() => handleRemoveTag(tag)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ×
-                </button>
+                <button onClick={() => handleRemoveTag(tag)} className="ml-1 hover:text-foreground">×</button>
               </span>
             ))}
             {showTagInput ? (
-              <form onSubmit={handleAddTag} className="inline-flex gap-1">
+              <form onSubmit={handleAddTag} className="flex items-center gap-1">
                 <input
-                  type="text"
+                  autoFocus
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
-                  placeholder="Tag name"
-                  className="px-2 py-1 text-sm border border-gray-300 rounded w-32 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  autoFocus
+                  className="px-2 py-1 bg-background border border-border rounded-full text-[10px] focus:outline-none focus:ring-1 focus:ring-primary w-24"
+                  placeholder="Tag name..."
                 />
-                <button type="submit" className="px-2 py-1 text-sm text-indigo-600 hover:text-indigo-700">
-                  Add
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowTagInput(false);
-                    setNewTag('');
-                  }}
-                  className="px-2 py-1 text-sm text-gray-600 hover:text-gray-700"
-                >
-                  Cancel
-                </button>
               </form>
             ) : (
               <button
                 onClick={() => setShowTagInput(true)}
-                className="px-2 py-1 text-sm text-indigo-600 hover:text-indigo-700 border border-dashed border-gray-300 rounded"
+                className="flex items-center gap-1 px-2 py-1 border border-border border-dashed rounded-full text-[10px] font-medium text-muted-foreground hover:bg-muted transition-colors"
               >
-                + Add Tag
+                <Plus className="h-3 w-3" />
+                Add Tag
               </button>
             )}
           </div>
-        </div>
 
-        {/* Content Editor */}
-        <div className="flex-1 overflow-hidden">
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="w-full h-full px-6 py-4 text-gray-900 resize-none focus:outline-none"
-            placeholder="Write about this page... Use [[Page Title]] to link to other wiki pages or chapters."
-            style={{ fontSize: '16px', lineHeight: '1.6' }}
-          />
-        </div>
-      </div>
-
-      {/* Right Sidebar */}
-      <aside className="w-80 bg-white border-l border-gray-200 overflow-y-auto">
-        <div className="p-4 space-y-6">
-          {/* Rebuild Links Button */}
-          <div>
-            <button
-              onClick={handleRebuildLinks}
-              disabled={rebuilding}
-              className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm font-medium disabled:opacity-50"
-            >
-              {rebuilding ? 'Rebuilding...' : '🔄 Rebuild Links'}
-            </button>
-            <p className="text-xs text-gray-500 mt-1">
-              Scan all content for [[wiki links]]
-            </p>
-          </div>
-
-          {/* Backlinks */}
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-3">
-              Backlinks ({backlinks.length})
-            </h3>
-            {backlinks.length === 0 ? (
-              <p className="text-sm text-gray-500">No pages link here yet</p>
-            ) : (
-              <div className="space-y-2">
-                {backlinks.map((link, index) => (
-                  <div
-                    key={index}
-                    className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer"
-                    onClick={() => {
-                      if (link.sourceType === 'wiki_page') {
-                        navigate(`/projects/${projectId}/wiki/${link.sourceId}`);
-                      } else {
-                        navigate(`/projects/${projectId}`);
-                      }
-                    }}
-                  >
-                    <div className="text-sm font-medium text-gray-900">
-                      {link.sourceTitle}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {link.sourceType === 'wiki_page' ? 'Wiki Page' : 'Chapter'}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Mentions (Chapters only) */}
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-3">
-              Mentioned in Chapters ({mentions.length})
-            </h3>
-            {mentions.length === 0 ? (
-              <p className="text-sm text-gray-500">
-                Not mentioned in any chapters yet
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {mentions.map((mention) => (
-                  <div
-                    key={mention.chapterId}
-                    className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer"
-                    onClick={() => navigate(`/projects/${projectId}`)}
-                  >
-                    <div className="text-sm font-medium text-gray-900">
-                      {mention.chapterTitle}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="flex-1">
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="w-full h-[65vh] text-foreground resize-none focus:outline-none bg-transparent font-serif leading-relaxed text-lg md:text-xl placeholder:opacity-30"
+              placeholder="Start describing your world..."
+            />
           </div>
         </div>
-      </aside>
-    </div>
+      }
+    />
   );
 }

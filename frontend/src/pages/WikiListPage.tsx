@@ -3,6 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { wikiAPI } from '../api/client';
 import type { WikiPage, WikiPageType } from '../types/wiki';
 import { WIKI_PAGE_TYPES } from '../types/wiki';
+import { AppShell } from '../components/layout/AppShell';
+import { Button } from '@/components/ui/button';
+import { Library } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function WikiListPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -68,6 +72,57 @@ export default function WikiListPage() {
     return pages.filter(p => p.pageType === type).length;
   };
 
+  const leftContext = (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+          <Library className="h-3 w-3" />
+          Wiki
+        </h2>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="text-xs text-primary hover:underline font-medium"
+        >
+          + New
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-[10px] font-medium text-muted-foreground uppercase mb-2 px-1">Filter by Type</h3>
+          <div className="flex flex-col gap-1">
+            <button
+              onClick={() => setSelectedType('all')}
+              className={cn(
+                "w-full text-left px-2 py-1.5 rounded text-xs transition-colors",
+                selectedType === 'all'
+                  ? "bg-muted text-foreground font-medium"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              )}
+            >
+              All Pages ({pages.length})
+            </button>
+            {WIKI_PAGE_TYPES.map(type => (
+              <button
+                key={type.value}
+                onClick={() => setSelectedType(type.value)}
+                className={cn(
+                  "w-full text-left px-2 py-1.5 rounded text-xs transition-colors flex items-center justify-between",
+                  selectedType === type.value
+                    ? "bg-muted text-foreground font-medium"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                )}
+              >
+                <span>{type.label}</span>
+                <span className="opacity-60">{getTypeCount(type.value)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -77,182 +132,112 @@ export default function WikiListPage() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-900">Wiki</h2>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium"
-          >
-            New Page
-          </button>
-        </div>
-      </div>
-
-      {/* Type Filter */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3">
-        <div className="flex gap-2 overflow-x-auto">
-          <button
-            onClick={() => setSelectedType('all')}
-            className={`px-3 py-1 rounded-full text-sm whitespace-nowrap ${
-              selectedType === 'all'
-                ? 'bg-indigo-100 text-indigo-700 font-medium'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            All ({pages.length})
-          </button>
-          {WIKI_PAGE_TYPES.map(type => (
-            <button
-              key={type.value}
-              onClick={() => setSelectedType(type.value)}
-              className={`px-3 py-1 rounded-full text-sm whitespace-nowrap ${
-                selectedType === type.value
-                  ? 'bg-indigo-100 text-indigo-700 font-medium'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {type.icon} {type.label} ({getTypeCount(type.value)})
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        {filteredPages.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">
-              {selectedType === 'all'
-                ? 'No wiki pages yet'
-                : `No ${WIKI_PAGE_TYPES.find(t => t.value === selectedType)?.label.toLowerCase()}s yet`
-              }
-            </p>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="text-indigo-600 hover:text-indigo-700 font-medium"
-            >
-              Create your first page
-            </button>
+    <AppShell
+      title="Project Wiki"
+      leftContext={leftContext}
+      main={
+        <div className="py-4">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold font-serif">Wiki</h2>
+            <Button onClick={() => setShowCreateModal(true)}>
+              New Page
+            </Button>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredPages.map(page => (
-              <div
-                key={page.id}
-                onClick={() => navigate(`/projects/${projectId}/wiki/${page.id}`)}
-                className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">{getTypeIcon(page.pageType)}</span>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">
-                      {page.title}
-                    </h3>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {WIKI_PAGE_TYPES.find(t => t.value === page.pageType)?.label}
-                    </p>
-                    {page.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {page.tags.slice(0, 3).map(tag => (
-                          <span
-                            key={tag}
-                            className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {page.tags.length > 3 && (
-                          <span className="px-2 py-0.5 text-gray-500 text-xs">
-                            +{page.tags.length - 3}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* Create Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Create Wiki Page
-            </h3>
-            <form onSubmit={handleCreatePage}>
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 text-sm">
-                  {error}
-                </div>
-              )}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Page Title
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Character name, location, etc."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Page Type
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {WIKI_PAGE_TYPES.map(type => (
-                      <button
-                        key={type.value}
-                        type="button"
-                        onClick={() => setPageType(type.value)}
-                        className={`px-3 py-2 rounded-md text-sm font-medium border ${
-                          pageType === type.value
-                            ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {type.icon} {type.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filteredPages.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-muted-foreground bg-muted/20 rounded-lg border border-dashed border-border">
+                No pages found. Create one to get started!
               </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setError('');
-                    setTitle('');
-                  }}
-                  className="px-4 py-2 text-gray-700 hover:text-gray-900"
-                  disabled={creating}
+            ) : (
+              filteredPages.map((page) => (
+                <div
+                  key={page.id}
+                  onClick={() => navigate(`/projects/${projectId}/wiki/${page.id}`)}
+                  className="p-4 bg-card/50 border border-border/50 rounded-lg hover:border-primary/50 hover:shadow-paperSm transition-all cursor-pointer group"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={creating}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                >
-                  {creating ? 'Creating...' : 'Create Page'}
-                </button>
-              </div>
-            </form>
+                  <div className="flex items-start justify-between mb-2">
+                    <span className="text-2xl" role="img" aria-label={page.pageType}>
+                      {getTypeIcon(page.pageType)}
+                    </span>
+                    <span className="text-[10px] font-medium uppercase text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded">
+                      {page.pageType}
+                    </span>
+                  </div>
+                  <h3 className="font-bold group-hover:text-primary transition-colors mb-1 font-serif">
+                    {page.title}
+                  </h3>
+                  {page.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-3">
+                      {page.tags.slice(0, 3).map(tag => (
+                        <span key={tag} className="text-[10px] bg-muted/50 text-muted-foreground px-1 py-0.5 rounded">
+                          #{tag}
+                        </span>
+                      ))}
+                      {page.tags.length > 3 && (
+                        <span className="text-[10px] text-muted-foreground">+{page.tags.length - 3}</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
+
+          {/* Create Modal */}
+          {showCreateModal && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-card rounded-xl shadow-paper max-w-md w-full p-8 border border-border">
+                <h3 className="text-2xl font-bold mb-6 font-serif">New Wiki Page</h3>
+                <form onSubmit={handleCreatePage} className="space-y-4">
+                  {error && (
+                    <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-2 rounded text-sm">
+                      {error}
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Title</label>
+                    <input
+                      required
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="w-full px-4 py-2 bg-background border border-border rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Type</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {WIKI_PAGE_TYPES.map(type => (
+                        <button
+                          key={type.value}
+                          type="button"
+                          onClick={() => setPageType(type.value)}
+                          className={cn(
+                            "px-3 py-2 rounded-md text-xs font-medium border transition-colors",
+                            pageType === type.value
+                              ? "bg-primary/10 border-primary text-primary"
+                              : "bg-background border-border text-muted-foreground hover:bg-muted"
+                          )}
+                        >
+                          {type.icon} {type.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3 mt-6">
+                    <Button variant="ghost" type="button" onClick={() => setShowCreateModal(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={creating}>
+                      {creating ? 'Creating...' : 'Create Page'}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      }
+    />
   );
 }
