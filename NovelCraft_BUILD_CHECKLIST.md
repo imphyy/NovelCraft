@@ -77,10 +77,10 @@ Optional:
 
 ## 🔍 Search (M2)
 
-- [ ] Search endpoint implemented
-- [ ] Chapters returned with snippets
-- [ ] Wiki pages returned with snippets
-- [ ] Results scoped to project only
+- [x] Search endpoint implemented
+- [x] Chapters returned with snippets
+- [x] Wiki pages returned with snippets
+- [x] Results scoped to project only
 
 ---
 
