@@ -5,12 +5,14 @@ import "os"
 type Config struct {
 	DatabaseURL string
 	Port        string
+	OpenAIAPIKey string
 }
 
 func Load() *Config {
 	return &Config{
 		DatabaseURL: getEnv("DATABASE_URL", "postgres://novelcraft:novelcraft@localhost:5432/novelcraft?sslmode=disable"),
 		Port:        getEnv("PORT", "8080"),
+		OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""),
 	}
 }
 

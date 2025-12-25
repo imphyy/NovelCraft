@@ -12,15 +12,22 @@ type WikiLinkRebuilder interface {
 	RebuildLinksForChapter(ctx context.Context, projectID, chapterID, content string) error
 }
 
+// DocumentProcessor interface for processing content for AI
+type DocumentProcessor interface {
+	ProcessDocument(ctx context.Context, projectID, sourceType, sourceID, content string) error
+}
+
 type Handler struct {
 	service           *Service
 	wikiLinkRebuilder WikiLinkRebuilder
+	documentProcessor DocumentProcessor
 }
 
-func NewHandler(service *Service, wikiLinkRebuilder WikiLinkRebuilder) *Handler {
+func NewHandler(service *Service, wikiLinkRebuilder WikiLinkRebuilder, documentProcessor DocumentProcessor) *Handler {
 	return &Handler{
 		service:           service,
 		wikiLinkRebuilder: wikiLinkRebuilder,
+		documentProcessor: documentProcessor,
 	}
 }
 
@@ -127,6 +134,16 @@ func (h *Handler) Update(c echo.Context) error {
 			// Log error but don't fail the request
 			// The chapter update succeeded, link rebuild can be retried later
 		}
+	}
+
+	// Process document for AI (chunk and embed) in background
+	if req.Content != nil && h.documentProcessor != nil {
+		go func() {
+			if err := h.documentProcessor.ProcessDocument(context.Background(), chapter.ProjectID, "chapter", chapter.ID, chapter.Content); err != nil {
+				// Log error but don't fail - this is a background operation
+				// TODO: Add proper logging
+			}
+		}()
 	}
 
 	return c.JSON(http.StatusOK, chapter)

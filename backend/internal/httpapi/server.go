@@ -5,14 +5,16 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
+	"github.com/imphyy/NovelCraft/backend/internal/ai"
 	"github.com/imphyy/NovelCraft/backend/internal/auth"
 	"github.com/imphyy/NovelCraft/backend/internal/chapters"
+	"github.com/imphyy/NovelCraft/backend/internal/config"
 	"github.com/imphyy/NovelCraft/backend/internal/projects"
 	"github.com/imphyy/NovelCraft/backend/internal/search"
 	"github.com/imphyy/NovelCraft/backend/internal/wiki"
 )
 
-func NewServer(db *pgxpool.Pool) *echo.Echo {
+func NewServer(db *pgxpool.Pool, cfg *config.Config) *echo.Echo {
 	e := echo.New()
 
 	// Validator
@@ -40,11 +42,18 @@ func NewServer(db *pgxpool.Pool) *echo.Echo {
 	projectsService := projects.NewService(db)
 	projectsHandler := projects.NewHandler(projectsService)
 
+	// AI services (optional - only if API key is configured)
+	var documentService *ai.DocumentService
+	if cfg.OpenAIAPIKey != "" {
+		embeddingsService := ai.NewEmbeddingsService(cfg.OpenAIAPIKey)
+		documentService = ai.NewDocumentService(db, embeddingsService)
+	}
+
 	wikiService := wiki.NewService(db)
-	wikiHandler := wiki.NewHandler(wikiService)
+	wikiHandler := wiki.NewHandler(wikiService, documentService)
 
 	chaptersService := chapters.NewService(db)
-	chaptersHandler := chapters.NewHandler(chaptersService, wikiService)
+	chaptersHandler := chapters.NewHandler(chaptersService, wikiService, documentService)
 
 	searchService := search.NewService(db)
 	searchHandler := search.NewHandler(searchService)

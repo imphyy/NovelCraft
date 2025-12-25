@@ -23,7 +23,7 @@ func main() {
 	defer dbPool.Close()
 
 	// Create server
-	server := httpapi.NewServer(dbPool)
+	server := httpapi.NewServer(dbPool, cfg)
 
 	log.Printf("Starting server on port %s", cfg.Port)
 	if err := server.Start(":" + cfg.Port); err != nil {

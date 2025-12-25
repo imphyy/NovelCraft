@@ -1,17 +1,27 @@
 package wiki
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-type Handler struct {
-	service *Service
+// DocumentProcessor interface for processing content for AI
+type DocumentProcessor interface {
+	ProcessDocument(ctx context.Context, projectID, sourceType, sourceID, content string) error
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+type Handler struct {
+	service           *Service
+	documentProcessor DocumentProcessor
+}
+
+func NewHandler(service *Service, documentProcessor DocumentProcessor) *Handler {
+	return &Handler{
+		service:           service,
+		documentProcessor: documentProcessor,
+	}
 }
 
 // ListByProject godoc
@@ -136,6 +146,16 @@ func (h *Handler) Update(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusConflict, "a page with this title already exists")
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update wiki page")
+	}
+
+	// Process document for AI (chunk and embed) in background
+	if req.Content != nil && h.documentProcessor != nil {
+		go func() {
+			if err := h.documentProcessor.ProcessDocument(context.Background(), page.ProjectID, "wiki_page", page.ID, page.Content); err != nil {
+				// Log error but don't fail - this is a background operation
+				// TODO: Add proper logging
+			}
+		}()
 	}
 
 	return c.JSON(http.StatusOK, page)
