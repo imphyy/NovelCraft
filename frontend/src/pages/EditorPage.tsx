@@ -155,6 +155,12 @@ export default function EditorPage() {
           <h1 className="text-lg font-semibold text-gray-900">
             {project?.name}
           </h1>
+          <button
+            onClick={() => navigate(`/projects/${projectId}/wiki`)}
+            className="px-3 py-1 text-sm text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded"
+          >
+            📚 Wiki
+          </button>
         </div>
         <div className="flex items-center gap-4">
           {saving && <span className="text-sm text-gray-500">Saving...</span>}

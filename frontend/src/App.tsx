@@ -4,6 +4,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProjectsPage from './pages/ProjectsPage';
 import EditorPage from './pages/EditorPage';
+import WikiListPage from './pages/WikiListPage';
+import WikiEditorPage from './pages/WikiEditorPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -40,6 +42,8 @@ function AppRoutes() {
       <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
       <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
       <Route path="/projects/:projectId" element={<ProtectedRoute><EditorPage /></ProtectedRoute>} />
+      <Route path="/projects/:projectId/wiki" element={<ProtectedRoute><WikiListPage /></ProtectedRoute>} />
+      <Route path="/projects/:projectId/wiki/:pageId" element={<ProtectedRoute><WikiEditorPage /></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/projects" replace />} />
     </Routes>
   );

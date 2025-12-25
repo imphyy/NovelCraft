@@ -60,3 +60,45 @@ export const chaptersAPI = {
   reorder: (projectId: string, chapterIds: string[]) =>
     apiClient.post(`/projects/${projectId}/chapters/reorder`, { chapterIds }),
 };
+
+// Wiki endpoints
+export const wikiAPI = {
+  list: (projectId: string) =>
+    apiClient.get(`/projects/${projectId}/wiki`),
+
+  create: (projectId: string, title: string, pageType: string) =>
+    apiClient.post(`/projects/${projectId}/wiki`, { title, pageType }),
+
+  get: (id: string) =>
+    apiClient.get(`/wiki/${id}`),
+
+  getBySlug: (projectId: string, slug: string) =>
+    apiClient.get(`/projects/${projectId}/wiki/by-slug/${slug}`),
+
+  update: (id: string, data: { title?: string; content?: string }) =>
+    apiClient.patch(`/wiki/${id}`, data),
+
+  delete: (id: string) =>
+    apiClient.delete(`/wiki/${id}`),
+
+  addTag: (id: string, tag: string) =>
+    apiClient.post(`/wiki/${id}/tags`, { tag }),
+
+  removeTag: (id: string, tag: string) =>
+    apiClient.delete(`/wiki/${id}/tags/${tag}`),
+
+  getBacklinks: (id: string) =>
+    apiClient.get(`/wiki/${id}/backlinks`),
+
+  getMentions: (id: string) =>
+    apiClient.get(`/wiki/${id}/mentions`),
+
+  rebuildLinks: (projectId: string) =>
+    apiClient.post(`/projects/${projectId}/wiki/rebuild-links`),
+};
+
+// Search endpoints
+export const searchAPI = {
+  search: (projectId: string, query: string) =>
+    apiClient.get(`/projects/${projectId}/search`, { params: { q: query } }),
+};
