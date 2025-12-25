@@ -64,14 +64,14 @@ Optional:
 
 ## 🧠 Wiki (M2)
 
-- [ ] wiki_pages table migrated
-- [ ] wiki_tags and junction tables migrated
-- [ ] Wiki CRUD endpoints implemented
-- [ ] Wiki types enforced
-- [ ] Tags can be added/removed
-- [ ] [[Wiki Links]] parsed correctly
-- [ ] Backlinks generated correctly
-- [ ] Mentions link wiki pages to chapters
+- [x] wiki_pages table migrated
+- [x] wiki_tags and junction tables migrated
+- [x] Wiki CRUD endpoints implemented
+- [x] Wiki types enforced
+- [x] Tags can be added/removed
+- [x] [[Wiki Links]] parsed correctly
+- [x] Backlinks generated correctly
+- [x] Mentions link wiki pages to chapters
 
 ---
 
