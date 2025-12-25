@@ -98,12 +98,12 @@ Optional:
 
 ## 🧭 Frontend – Wiki (M2)
 
-- [ ] Wiki list page works
-- [ ] Wiki editor page works
-- [ ] Tag editor UI works
-- [ ] Backlinks panel visible
-- [ ] Mentions panel visible
-- [ ] Rebuild links button works
+- [x] Wiki list page works
+- [x] Wiki editor page works
+- [x] Tag editor UI works
+- [x] Backlinks panel visible
+- [x] Mentions panel visible
+- [x] Rebuild links button works
 
 ---
 
