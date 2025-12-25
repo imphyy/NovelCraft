@@ -11,6 +11,21 @@ jobs:
     name: Backend
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: novelcraft
+          POSTGRES_PASSWORD: novelcraft
+          POSTGRES_DB: novelcraft_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,9 +40,22 @@ jobs:
         working-directory: ./backend
         run: go mod download
 
-      - name: Run tests
+      - name: Run unit tests
         working-directory: ./backend
-        run: go test -v ./...
+        run: go test -v -short ./...
+
+      - name: Run all tests with coverage
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgres://novelcraft:novelcraft@localhost:5432/novelcraft_test?sslmode=disable
+        run: go test -v -coverprofile=coverage.out ./...
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/coverage.out
+          flags: backend
+        continue-on-error: true
 
       - name: Build
         working-directory: ./backend
@@ -51,6 +79,26 @@ jobs:
       - name: Install dependencies
         working-directory: ./frontend
         run: npm ci
+
+      - name: Run tests
+        working-directory: ./frontend
+        run: npm run test
+
+      - name: Run tests with coverage
+        working-directory: ./frontend
+        run: npm run test:coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./frontend/coverage/coverage-final.json
+          flags: frontend
+        continue-on-error: true
+
+      - name: Lint
+        working-directory: ./frontend
+        run: npm run lint
+        continue-on-error: true
 
       - name: Build
         working-directory: ./frontend
