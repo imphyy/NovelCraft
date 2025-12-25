@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/imphyy/NovelCraft/backend/internal/ai"
 	"github.com/imphyy/NovelCraft/backend/internal/auth"
 	"github.com/imphyy/NovelCraft/backend/internal/chapters"
 	"github.com/imphyy/NovelCraft/backend/internal/projects"
@@ -12,7 +13,7 @@ import (
 	"github.com/imphyy/NovelCraft/backend/internal/wiki"
 )
 
-func setupRoutes(e *echo.Echo, authHandler *auth.Handler, authService *auth.Service, projectsHandler *projects.Handler, chaptersHandler *chapters.Handler, wikiHandler *wiki.Handler, searchHandler *search.Handler) {
+func setupRoutes(e *echo.Echo, authHandler *auth.Handler, authService *auth.Service, projectsHandler *projects.Handler, chaptersHandler *chapters.Handler, wikiHandler *wiki.Handler, searchHandler *search.Handler, aiHandler *ai.Handler) {
 	// API group
 	api := e.Group("/api")
 
@@ -71,6 +72,12 @@ func setupRoutes(e *echo.Echo, authHandler *auth.Handler, authService *auth.Serv
 
 	// Search routes (all protected)
 	projectsGroup.GET("/:projectId/search", searchHandler.Search)
+
+	// AI routes (all protected, optional - only if AI services configured)
+	if aiHandler != nil {
+		projectsGroup.POST("/:projectId/ai/ask", aiHandler.Ask)
+		chaptersGroup.POST("/:id/ai/rewrite", aiHandler.Rewrite)
+	}
 }
 
 func healthHandler(c echo.Context) error {

@@ -44,9 +44,18 @@ func NewServer(db *pgxpool.Pool, cfg *config.Config) *echo.Echo {
 
 	// AI services (optional - only if API key is configured)
 	var documentService *ai.DocumentService
+	var aiHandler *ai.Handler
 	if cfg.OpenAIAPIKey != "" {
 		embeddingsService := ai.NewEmbeddingsService(cfg.OpenAIAPIKey)
 		documentService = ai.NewDocumentService(db, embeddingsService)
+
+		// AI feature services
+		retrievalService := ai.NewRetrievalService(db, embeddingsService)
+		chatService := ai.NewChatService(cfg.OpenAIAPIKey)
+		askService := ai.NewAskService(db, retrievalService, chatService)
+		rewriteService := ai.NewRewriteService(chatService)
+
+		aiHandler = ai.NewHandler(askService, rewriteService)
 	}
 
 	wikiService := wiki.NewService(db)
@@ -59,7 +68,7 @@ func NewServer(db *pgxpool.Pool, cfg *config.Config) *echo.Echo {
 	searchHandler := search.NewHandler(searchService)
 
 	// Routes
-	setupRoutes(e, authHandler, authService, projectsHandler, chaptersHandler, wikiHandler, searchHandler)
+	setupRoutes(e, authHandler, authService, projectsHandler, chaptersHandler, wikiHandler, searchHandler, aiHandler)
 
 	return e
 }
