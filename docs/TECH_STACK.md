@@ -32,6 +32,22 @@ NovelCraft uses a modern, straightforward tech stack optimized for a single deve
 - Native ESM support
 - Better than CRA for modern projects
 
+### UI Components: shadcn/ui + Tailwind CSS
+**Why shadcn/ui?**
+- Built on Radix UI (accessible, unstyled primitives)
+- Components copied into project (not a dependency)
+- Highly customizable with Tailwind CSS
+- Clean, modern design perfect for writing apps
+- Excellent TypeScript support
+- Easy to modify and extend
+
+**Key Components Used:**
+- Button, Input, Textarea
+- Dialog, Dropdown Menu, Popover
+- Card, Tabs, Separator
+- Toast for notifications
+- Form components with validation
+
 ### Editor Libraries
 **Option 1: TipTap** (Recommended)
 - Rich text editor built on ProseMirror
@@ -39,12 +55,13 @@ NovelCraft uses a modern, straightforward tech stack optimized for a single deve
 - Good TypeScript support
 - Supports collaborative editing if needed later
 
-**Option 2: Milkdown**
-- Markdown-based
-- Plugin system
-- Lighter weight
+**Option 2: Textarea with autosave** (Simpler start)
+- Plain textarea with debounced autosave
+- Markdown support via marked/remark
+- Lighter weight, less complexity
+- Can upgrade to TipTap later
 
-**Decision:** Start with **TipTap** for rich text, can switch to Milkdown later if Markdown preferred.
+**Decision:** Start with **simple textarea + autosave** for MVP, upgrade to TipTap if rich formatting needed.
 
 ---
 
