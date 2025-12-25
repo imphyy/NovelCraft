@@ -8,10 +8,11 @@ import (
 	"github.com/imphyy/NovelCraft/backend/internal/auth"
 	"github.com/imphyy/NovelCraft/backend/internal/chapters"
 	"github.com/imphyy/NovelCraft/backend/internal/projects"
+	"github.com/imphyy/NovelCraft/backend/internal/search"
 	"github.com/imphyy/NovelCraft/backend/internal/wiki"
 )
 
-func setupRoutes(e *echo.Echo, authHandler *auth.Handler, authService *auth.Service, projectsHandler *projects.Handler, chaptersHandler *chapters.Handler, wikiHandler *wiki.Handler) {
+func setupRoutes(e *echo.Echo, authHandler *auth.Handler, authService *auth.Service, projectsHandler *projects.Handler, chaptersHandler *chapters.Handler, wikiHandler *wiki.Handler, searchHandler *search.Handler) {
 	// API group
 	api := e.Group("/api")
 
@@ -67,6 +68,9 @@ func setupRoutes(e *echo.Echo, authHandler *auth.Handler, authService *auth.Serv
 	wikiGroup.DELETE("/:id/tags/:tag", wikiHandler.RemoveTag)
 	wikiGroup.GET("/:id/backlinks", wikiHandler.GetBacklinks)
 	wikiGroup.GET("/:id/mentions", wikiHandler.GetMentions)
+
+	// Search routes (all protected)
+	projectsGroup.GET("/:projectId/search", searchHandler.Search)
 }
 
 func healthHandler(c echo.Context) error {
