@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { wikiAPI } from '../api/client';
-import { WikiPage, Backlink, Mention, WIKI_PAGE_TYPES } from '../types/wiki';
+import type { WikiPage, Backlink, Mention } from '../types/wiki';
+import { WIKI_PAGE_TYPES } from '../types/wiki';
 
 export default function WikiEditorPage() {
   const { projectId, pageId } = useParams<{ projectId: string; pageId: string }>();
@@ -17,7 +18,7 @@ export default function WikiEditorPage() {
   const [showTagInput, setShowTagInput] = useState(false);
   const [rebuilding, setRebuilding] = useState(false);
 
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lastSavedContent = useRef('');
 
   useEffect(() => {

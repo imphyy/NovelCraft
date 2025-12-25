@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { projectsAPI, chaptersAPI } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
+import { RewriteModal } from '../components/RewriteModal';
 
 interface Project {
   id: string;
@@ -31,9 +32,12 @@ export default function EditorPage() {
   const [showNewChapter, setShowNewChapter] = useState(false);
   const [newChapterTitle, setNewChapterTitle] = useState('');
   const [error, setError] = useState('');
+  const [showRewriteModal, setShowRewriteModal] = useState(false);
+  const [selectedText, setSelectedText] = useState('');
 
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lastSavedContent = useRef('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     loadProjectAndChapters();
@@ -133,6 +137,29 @@ export default function EditorPage() {
     }
   };
 
+  const handleOpenRewrite = () => {
+    if (!textareaRef.current) return;
+
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+    const text = content.substring(start, end);
+
+    if (text.trim()) {
+      setSelectedText(text);
+      setShowRewriteModal(true);
+    }
+  };
+
+  const handleAcceptRewrite = (newText: string) => {
+    if (!textareaRef.current) return;
+
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+
+    const newContent = content.substring(0, start) + newText + content.substring(end);
+    setContent(newContent);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -168,6 +195,14 @@ export default function EditorPage() {
             <span className="text-sm text-gray-500">
               {selectedChapter.wordCount} words
             </span>
+          )}
+          {selectedChapter && (
+            <button
+              onClick={handleOpenRewrite}
+              className="px-3 py-1 text-sm text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded"
+            >
+              ✨ AI Rewrite
+            </button>
           )}
           <button
             onClick={handleLogout}
@@ -265,6 +300,7 @@ export default function EditorPage() {
               </div>
               <div className="flex-1 overflow-hidden">
                 <textarea
+                  ref={textareaRef}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   className="w-full h-full px-6 py-4 text-gray-900 resize-none focus:outline-none"
@@ -280,6 +316,17 @@ export default function EditorPage() {
           )}
         </main>
       </div>
+
+      {/* Rewrite Modal */}
+      {selectedChapter && (
+        <RewriteModal
+          open={showRewriteModal}
+          onOpenChange={setShowRewriteModal}
+          chapterId={selectedChapter.id}
+          selectedText={selectedText}
+          onAccept={handleAcceptRewrite}
+        />
+      )}
     </div>
   );
 }

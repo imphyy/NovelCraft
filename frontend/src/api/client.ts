@@ -102,3 +102,12 @@ export const searchAPI = {
   search: (projectId: string, query: string) =>
     apiClient.get(`/projects/${projectId}/search`, { params: { q: query } }),
 };
+
+// AI endpoints
+export const aiAPI = {
+  ask: (projectId: string, question: string, canonSafe: boolean = true, maxChunks: number = 10) =>
+    apiClient.post(`/projects/${projectId}/ai/ask`, { question, canonSafe, maxChunks }),
+
+  rewrite: (chapterId: string, tool: string, text: string, instruction?: string) =>
+    apiClient.post(`/chapters/${chapterId}/ai/rewrite`, { tool, text, instruction }),
+};

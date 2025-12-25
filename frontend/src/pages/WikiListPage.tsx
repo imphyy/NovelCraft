@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { wikiAPI } from '../api/client';
-import { WikiPage, WikiPageType, WIKI_PAGE_TYPES } from '../types/wiki';
+import type { WikiPage, WikiPageType } from '../types/wiki';
+import { WIKI_PAGE_TYPES } from '../types/wiki';
 
 export default function WikiListPage() {
   const { projectId } = useParams<{ projectId: string }>();
