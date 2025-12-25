@@ -59,6 +59,12 @@ export const chaptersAPI = {
 
   reorder: (projectId: string, chapterIds: string[]) =>
     apiClient.post(`/projects/${projectId}/chapters/reorder`, { chapterIds }),
+
+  listRevisions: (chapterId: string) =>
+    apiClient.get(`/chapters/${chapterId}/revisions`),
+
+  restoreRevision: (revisionId: string) =>
+    apiClient.post(`/revisions/${revisionId}/restore`),
 };
 
 // Wiki endpoints
