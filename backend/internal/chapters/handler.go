@@ -1,17 +1,27 @@
 package chapters
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-type Handler struct {
-	service *Service
+// WikiLinkRebuilder interface for rebuilding wiki links
+type WikiLinkRebuilder interface {
+	RebuildLinksForChapter(ctx context.Context, projectID, chapterID, content string) error
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+type Handler struct {
+	service           *Service
+	wikiLinkRebuilder WikiLinkRebuilder
+}
+
+func NewHandler(service *Service, wikiLinkRebuilder WikiLinkRebuilder) *Handler {
+	return &Handler{
+		service:           service,
+		wikiLinkRebuilder: wikiLinkRebuilder,
+	}
 }
 
 // ListByProject godoc
@@ -109,6 +119,14 @@ func (h *Handler) Update(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusForbidden, "access denied")
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update chapter")
+	}
+
+	// Rebuild wiki links if content was updated
+	if req.Content != nil && h.wikiLinkRebuilder != nil {
+		if err := h.wikiLinkRebuilder.RebuildLinksForChapter(c.Request().Context(), chapter.ProjectID, chapter.ID, chapter.Content); err != nil {
+			// Log error but don't fail the request
+			// The chapter update succeeded, link rebuild can be retried later
+		}
 	}
 
 	return c.JSON(http.StatusOK, chapter)

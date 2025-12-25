@@ -8,9 +8,10 @@ import (
 	"github.com/imphyy/NovelCraft/backend/internal/auth"
 	"github.com/imphyy/NovelCraft/backend/internal/chapters"
 	"github.com/imphyy/NovelCraft/backend/internal/projects"
+	"github.com/imphyy/NovelCraft/backend/internal/wiki"
 )
 
-func setupRoutes(e *echo.Echo, authHandler *auth.Handler, authService *auth.Service, projectsHandler *projects.Handler, chaptersHandler *chapters.Handler) {
+func setupRoutes(e *echo.Echo, authHandler *auth.Handler, authService *auth.Service, projectsHandler *projects.Handler, chaptersHandler *chapters.Handler, wikiHandler *wiki.Handler) {
 	// API group
 	api := e.Group("/api")
 
@@ -50,6 +51,22 @@ func setupRoutes(e *echo.Echo, authHandler *auth.Handler, authService *auth.Serv
 	revisionsGroup := api.Group("/revisions", auth.RequireAuth(authService))
 	revisionsGroup.GET("/:id", chaptersHandler.GetRevision)
 	revisionsGroup.POST("/:id/restore", chaptersHandler.RestoreRevision)
+
+	// Wiki routes nested under projects (all protected)
+	projectsGroup.GET("/:projectId/wiki", wikiHandler.ListByProject)
+	projectsGroup.POST("/:projectId/wiki", wikiHandler.Create)
+	projectsGroup.GET("/:projectId/wiki/by-slug/:slug", wikiHandler.GetBySlug)
+	projectsGroup.POST("/:projectId/wiki/rebuild-links", wikiHandler.RebuildLinks)
+
+	// Wiki routes (all protected)
+	wikiGroup := api.Group("/wiki", auth.RequireAuth(authService))
+	wikiGroup.GET("/:id", wikiHandler.Get)
+	wikiGroup.PATCH("/:id", wikiHandler.Update)
+	wikiGroup.DELETE("/:id", wikiHandler.Delete)
+	wikiGroup.POST("/:id/tags", wikiHandler.AddTag)
+	wikiGroup.DELETE("/:id/tags/:tag", wikiHandler.RemoveTag)
+	wikiGroup.GET("/:id/backlinks", wikiHandler.GetBacklinks)
+	wikiGroup.GET("/:id/mentions", wikiHandler.GetMentions)
 }
 
 func healthHandler(c echo.Context) error {

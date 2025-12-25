@@ -8,6 +8,7 @@ import (
 	"github.com/imphyy/NovelCraft/backend/internal/auth"
 	"github.com/imphyy/NovelCraft/backend/internal/chapters"
 	"github.com/imphyy/NovelCraft/backend/internal/projects"
+	"github.com/imphyy/NovelCraft/backend/internal/wiki"
 )
 
 func NewServer(db *pgxpool.Pool) *echo.Echo {
@@ -38,11 +39,14 @@ func NewServer(db *pgxpool.Pool) *echo.Echo {
 	projectsService := projects.NewService(db)
 	projectsHandler := projects.NewHandler(projectsService)
 
+	wikiService := wiki.NewService(db)
+	wikiHandler := wiki.NewHandler(wikiService)
+
 	chaptersService := chapters.NewService(db)
-	chaptersHandler := chapters.NewHandler(chaptersService)
+	chaptersHandler := chapters.NewHandler(chaptersService, wikiService)
 
 	// Routes
-	setupRoutes(e, authHandler, authService, projectsHandler, chaptersHandler)
+	setupRoutes(e, authHandler, authService, projectsHandler, chaptersHandler, wikiHandler)
 
 	return e
 }
