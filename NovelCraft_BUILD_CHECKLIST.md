@@ -86,13 +86,13 @@ Optional:
 
 ## 🖥 Frontend – Core (M1)
 
-- [ ] Login page works
-- [ ] Auth redirect logic works
-- [ ] Project list page works
-- [ ] Project creation UI works
-- [ ] Chapter sidebar renders correctly
-- [ ] Editor saves content reliably
-- [ ] Loading/saving states visible
+- [x] Login page works
+- [x] Auth redirect logic works
+- [x] Project list page works
+- [x] Project creation UI works
+- [x] Chapter sidebar renders correctly
+- [x] Editor saves content reliably
+- [x] Loading/saving states visible
 
 ---
 
