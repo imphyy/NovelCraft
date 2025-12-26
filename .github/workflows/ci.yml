@@ -33,7 +33,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
 
       - name: Install dependencies
@@ -55,7 +55,7 @@ jobs:
         with:
           files: ./backend/coverage.out
           flags: backend
-        continue-on-error: true
+        continue-on-error: true  # Keep optional for codecov
 
       - name: Build
         working-directory: ./backend
@@ -93,12 +93,11 @@ jobs:
         with:
           files: ./frontend/coverage/coverage-final.json
           flags: frontend
-        continue-on-error: true
+        continue-on-error: true  # Keep optional for codecov
 
       - name: Lint
         working-directory: ./frontend
         run: npm run lint
-        continue-on-error: true
 
       - name: Build
         working-directory: ./frontend
