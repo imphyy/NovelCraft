@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/imphyy/NovelCraft/backend/internal/apierrors"
 	"github.com/imphyy/NovelCraft/backend/internal/config"
 	"github.com/labstack/echo/v4"
 )
@@ -34,25 +35,29 @@ type LoginRequest struct {
 func (h *Handler) Register(c echo.Context) error {
 	var req RegisterRequest
 	if err := c.Bind(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+		return apierrors.BadRequest(c, "Invalid request body", nil)
 	}
 
 	if err := c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return apierrors.ValidationFailed(c, "Validation failed", map[string]interface{}{
+			"validation_errors": err.Error(),
+		})
 	}
 
 	userID, err := h.service.Register(c.Request().Context(), req.Email, req.Password)
 	if err != nil {
 		if err == ErrUserExists {
-			return echo.NewHTTPError(http.StatusConflict, "email already exists")
+			return apierrors.Conflict(c, "Email already exists", map[string]interface{}{
+				"field": "email",
+			})
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to register user")
+		return apierrors.InternalServerError(c, "Failed to register user")
 	}
 
 	// Auto-login after registration
 	token, err := h.service.Login(c.Request().Context(), req.Email, req.Password)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create session")
+		return apierrors.InternalServerError(c, "Failed to create session")
 	}
 
 	// Set cookie
@@ -61,7 +66,7 @@ func (h *Handler) Register(c echo.Context) error {
 	// Get user info
 	user, err := h.service.GetUserByID(c.Request().Context(), userID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user")
+		return apierrors.InternalServerError(c, "Failed to get user")
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
@@ -73,19 +78,21 @@ func (h *Handler) Register(c echo.Context) error {
 func (h *Handler) Login(c echo.Context) error {
 	var req LoginRequest
 	if err := c.Bind(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+		return apierrors.BadRequest(c, "Invalid request body", nil)
 	}
 
 	if err := c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return apierrors.ValidationFailed(c, "Validation failed", map[string]interface{}{
+			"validation_errors": err.Error(),
+		})
 	}
 
 	token, err := h.service.Login(c.Request().Context(), req.Email, req.Password)
 	if err != nil {
 		if err == ErrInvalidCredentials {
-			return echo.NewHTTPError(http.StatusUnauthorized, "invalid credentials")
+			return apierrors.Unauthorized(c, "Invalid email or password")
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to login")
+		return apierrors.InternalServerError(c, "Failed to login")
 	}
 
 	// Set cookie
@@ -95,7 +102,7 @@ func (h *Handler) Login(c echo.Context) error {
 	userID, _ := h.service.ValidateSession(c.Request().Context(), token)
 	user, err := h.service.GetUserByID(c.Request().Context(), userID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user")
+		return apierrors.InternalServerError(c, "Failed to get user")
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
