@@ -4,15 +4,20 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/imphyy/NovelCraft/backend/internal/config"
 	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
 	service *Service
+	config  *config.Config
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, cfg *config.Config) *Handler {
+	return &Handler{
+		service: service,
+		config:  cfg,
+	}
 }
 
 type RegisterRequest struct {
@@ -51,7 +56,7 @@ func (h *Handler) Register(c echo.Context) error {
 	}
 
 	// Set cookie
-	setSessionCookie(c, token)
+	h.setSessionCookie(c, token)
 
 	// Get user info
 	user, err := h.service.GetUserByID(c.Request().Context(), userID)
@@ -84,7 +89,7 @@ func (h *Handler) Login(c echo.Context) error {
 	}
 
 	// Set cookie
-	setSessionCookie(c, token)
+	h.setSessionCookie(c, token)
 
 	// Get user info
 	userID, _ := h.service.ValidateSession(c.Request().Context(), token)
@@ -111,7 +116,7 @@ func (h *Handler) Logout(c echo.Context) error {
 	}
 
 	// Clear cookie
-	clearSessionCookie(c)
+	h.clearSessionCookie(c)
 
 	return c.JSON(http.StatusOK, map[string]bool{"ok": true})
 }
@@ -130,28 +135,54 @@ func (h *Handler) Me(c echo.Context) error {
 	})
 }
 
-func setSessionCookie(c echo.Context, token string) {
+func (h *Handler) setSessionCookie(c echo.Context, token string) {
+	sameSite := http.SameSiteLaxMode
+	switch h.config.CookieSameSite {
+	case "Strict":
+		sameSite = http.SameSiteStrictMode
+	case "None":
+		sameSite = http.SameSiteNoneMode
+	default:
+		sameSite = http.SameSiteLaxMode
+	}
+
 	cookie := &http.Cookie{
 		Name:     SessionCookieName,
 		Value:    token,
 		Path:     "/",
 		Expires:  time.Now().Add(SessionDuration),
 		HttpOnly: true,
-		Secure:   false, // Set to true in production with HTTPS
-		SameSite: http.SameSiteLaxMode,
+		Secure:   h.config.CookieSecure,
+		SameSite: sameSite,
+	}
+	if h.config.CookieDomain != "" {
+		cookie.Domain = h.config.CookieDomain
 	}
 	c.SetCookie(cookie)
 }
 
-func clearSessionCookie(c echo.Context) {
+func (h *Handler) clearSessionCookie(c echo.Context) {
+	sameSite := http.SameSiteLaxMode
+	switch h.config.CookieSameSite {
+	case "Strict":
+		sameSite = http.SameSiteStrictMode
+	case "None":
+		sameSite = http.SameSiteNoneMode
+	default:
+		sameSite = http.SameSiteLaxMode
+	}
+
 	cookie := &http.Cookie{
 		Name:     SessionCookieName,
 		Value:    "",
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
+		Secure:   h.config.CookieSecure,
+		SameSite: sameSite,
+	}
+	if h.config.CookieDomain != "" {
+		cookie.Domain = h.config.CookieDomain
 	}
 	c.SetCookie(cookie)
 }

@@ -27,9 +27,9 @@ func NewServer(db *pgxpool.Pool, cfg *config.Config) *echo.Echo {
 	e.Use(middleware.Secure())
 	e.Use(middleware.BodyLimit("2M"))
 
-	// CORS for development
+	// CORS
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{cfg.CORSOrigin},
 		AllowCredentials: true,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type", "Authorization"},
@@ -37,7 +37,7 @@ func NewServer(db *pgxpool.Pool, cfg *config.Config) *echo.Echo {
 
 	// Services
 	authService := auth.NewService(db)
-	authHandler := auth.NewHandler(authService)
+	authHandler := auth.NewHandler(authService, cfg)
 
 	projectsService := projects.NewService(db)
 	projectsHandler := projects.NewHandler(projectsService)
