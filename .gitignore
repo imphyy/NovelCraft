@@ -1,5 +1,6 @@
 # Backend (Go)
 backend/cmd/api/api
+backend/api
 *.exe
 *.exe~
 *.dll
@@ -8,10 +9,12 @@ backend/cmd/api/api
 *.test
 *.out
 go.work
+bin/
 
 # Frontend (Node/React)
 node_modules/
 dist/
+frontend/dist/
 dist-ssr/
 *.local
 .env

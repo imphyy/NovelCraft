@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Menu, Search, Sun, Moon, User, Settings, PanelLeft, PanelRight } from 'lucide-react';
+import { Search, Sun, Moon, User, LogOut, PanelLeft, PanelRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useTheme } from '@/components/theme-provider';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AppHeaderProps {
   onOpenLeft?: () => void;
@@ -11,9 +12,19 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ onOpenLeft, onOpenRight, title = "NovelCraft" }: AppHeaderProps) {
-  const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { logout } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (err) {
+      console.error('Failed to logout:', err);
+    }
+  };
 
   return (
     <header className="h-14 border-b border-border/10 bg-muted/20 flex items-center justify-between px-4 sticky top-0 z-40">
@@ -52,9 +63,36 @@ export function AppHeader({ onOpenLeft, onOpenRight, title = "NovelCraft" }: App
         >
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
-        <Button variant="ghost" size="icon" className="text-muted-foreground/60 hover:text-foreground">
-          <User className="h-4 w-4" />
-        </Button>
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground/60 hover:text-foreground"
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+          >
+            <User className="h-4 w-4" />
+          </Button>
+          {showProfileMenu && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowProfileMenu(false)}
+              />
+              <div className="absolute right-0 mt-2 w-48 bg-card border border-border/40 rounded-sm shadow-lg z-50">
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setShowProfileMenu(false);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-muted/50 transition-colors flex items-center gap-2 text-foreground"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              </div>
+            </>
+          )}
+        </div>
         <Button variant="ghost" size="icon" className="lg:hidden text-muted-foreground/60 hover:text-foreground" onClick={onOpenRight}>
           <PanelRight className="h-4 w-4" />
         </Button>
