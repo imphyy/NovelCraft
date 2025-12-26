@@ -11,7 +11,7 @@ export function PaperSheet({ children, className, isContent = true }: PaperSheet
   return (
     <div 
       className={cn(
-        "bg-card border border-border shadow-paper rounded-md p-6 md:p-8",
+        "bg-card border border-border shadow-paper rounded-md p-6 md:p-10",
         isContent && "font-serif leading-relaxed text-lg",
         className
       )}

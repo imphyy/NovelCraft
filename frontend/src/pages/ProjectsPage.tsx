@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { projectsAPI } from '../api/client';
-
+import { Button } from '@/components/ui/button';
 import { AppShell } from '../components/layout/AppShell';
 
 interface Project {
@@ -81,99 +81,89 @@ export default function ProjectsPage() {
       title="My Projects"
       hideRight
       main={
-        <div className="py-4">
-          <div className="flex justify-between items-center mb-8">
+        <div className="relative pl-8">
+          {/* Visual Motif: Left gutter accent */}
+          <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-border/40" />
+
+          <div className="flex justify-between items-baseline mb-20">
             <div>
-              <h2 className="text-3xl font-bold text-foreground font-serif mb-2">My Projects</h2>
-              <p className="text-muted-foreground">Create and manage your writing projects</p>
+              <h1 className="text-5xl font-serif text-foreground tracking-tight mb-4">My Projects</h1>
+              <p className="text-base text-muted-foreground">Manage your writing projects and chronicles</p>
             </div>
-            <button
+            <Button
               onClick={() => setShowCreateModal(true)}
-              className="px-6 py-3 bg-primary text-primary-foreground rounded-xl hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 shadow-paperSm transition-all duration-200 font-medium"
+              className="rounded-none px-8 h-10 text-xs font-semibold uppercase tracking-widest shadow-none"
             >
-              + New Project
-            </button>
+              New Project
+            </Button>
           </div>
 
           {projects.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">No projects yet</h3>
-              <p className="text-muted-foreground mb-6">Start your writing journey by creating your first project</p>
-              <button
+            <div className="py-24 max-w-lg border-t border-border/10">
+              <h3 className="text-2xl font-serif font-medium text-foreground mb-4">No projects yet</h3>
+              <p className="text-muted-foreground/60 mb-10 leading-relaxed">Your literary journey begins here. Create your first project to start writing.</p>
+              <Button
                 onClick={() => setShowCreateModal(true)}
-                className="px-6 py-3 bg-primary text-primary-foreground rounded-xl hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 shadow-paperSm transition-all duration-200 font-medium"
+                variant="secondary"
+                className="rounded-none px-10 h-12 text-xs font-semibold uppercase tracking-widest"
               >
                 Create your first project
-              </button>
+              </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-0">
               {projects.map((project) => (
                 <div
                   key={project.id}
                   onClick={() => navigate(`/projects/${project.id}`)}
-                  className="group bg-card p-6 rounded-xl shadow-paperSm hover:shadow-paper transition-all duration-300 cursor-pointer border border-border hover:border-primary hover:-translate-y-1"
+                  className="group cursor-pointer py-10 border-t border-border/10 first:border-t-0 hover:bg-muted/5 transition-colors"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 bg-primary/20 border border-primary/30 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-paperSm">
-                      <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
+                  <div className="flex justify-between items-start gap-8">
+                    <div className="space-y-4 max-w-2xl">
+                      <h3 className="text-3xl font-serif text-foreground group-hover:text-primary transition-colors">
+                        {project.name}
+                      </h3>
+                      <p className="text-base text-muted-foreground/70 line-clamp-2 leading-relaxed">
+                        {project.description || 'No description provided for this manuscript.'}
+                      </p>
+                      <div className="flex items-center gap-4 pt-2">
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40 font-bold">
+                          Last edited {new Date(project.updatedAt).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
-                    <svg className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors font-serif">
-                    {project.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
-                    {project.description || 'No description'}
-                  </p>
-                  <div className="flex items-center justify-between pt-4 border-t border-border">
-                    <p className="text-xs text-ink-muted flex items-center gap-1">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {new Date(project.updatedAt).toLocaleDateString()}
-                    </p>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity pt-2">
+                      <Button variant="ghost" size="sm" className="h-8 text-[10px] uppercase tracking-widest">
+                        Open Project
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
+              <div className="border-t border-border/10" />
             </div>
           )}
 
-          {/* Create Project Modal */}
           {showCreateModal && (
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="bg-card rounded-xl shadow-paper max-w-md w-full p-8 border border-border">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-primary/20 border border-primary/30 rounded-lg flex items-center justify-center shadow-paperSm">
-                    <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </div>
-                  <h3 className="text-2xl font-bold text-foreground font-serif">
-                    Create New Project
+            <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-card max-w-lg w-full p-12 border border-border/50 shadow-2xl">
+                <div className="mb-10">
+                  <h3 className="text-3xl font-serif text-foreground mb-3">
+                    Begin a New Project
                   </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed italic">
+                    Every great story starts with a single word.
+                  </p>
                 </div>
                 <form onSubmit={handleCreateProject}>
                   {error && (
-                    <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg mb-4 flex items-start gap-2">
-                      <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                      <span>{error}</span>
+                    <div className="bg-destructive/5 text-destructive text-xs px-4 py-3 border-l-2 border-destructive mb-8">
+                      {error}
                     </div>
                   )}
-                  <div className="space-y-5">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-semibold text-foreground mb-2">
+                  <div className="space-y-8">
+                    <div className="space-y-2">
+                      <label htmlFor="name" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                         Project Name
                       </label>
                       <input
@@ -182,25 +172,25 @@ export default function ProjectsPage() {
                         required
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-4 py-3 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-                        placeholder="My Novel"
+                        className="w-full bg-transparent border-b border-border/50 py-2 focus:border-primary focus:outline-none transition-colors placeholder:text-muted-foreground/20 font-serif text-xl"
+                        placeholder="The Great American Novel"
                       />
                     </div>
-                    <div>
-                      <label htmlFor="description" className="block text-sm font-semibold text-foreground mb-2">
-                        Description (optional)
+                    <div className="space-y-2">
+                      <label htmlFor="description" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                        Description
                       </label>
                       <textarea
                         id="description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={3}
-                        className="w-full px-4 py-3 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring transition-all resize-none"
+                        className="w-full bg-transparent border border-border/30 p-3 focus:border-primary focus:outline-none transition-colors resize-none placeholder:text-muted-foreground/20 text-sm leading-relaxed"
                         placeholder="A brief description of your project..."
                       />
                     </div>
                   </div>
-                  <div className="flex justify-end gap-3 mt-8">
+                  <div className="flex justify-end items-center gap-8 mt-12">
                     <button
                       type="button"
                       onClick={() => {
@@ -209,18 +199,18 @@ export default function ProjectsPage() {
                         setName('');
                         setDescription('');
                       }}
-                      className="px-6 py-3 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors font-medium"
+                      className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
                       disabled={creating}
                     >
                       Cancel
                     </button>
-                    <button
+                    <Button
                       type="submit"
                       disabled={creating}
-                      className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed shadow-paperSm transition-all font-medium"
+                      className="rounded-none px-10 h-11 text-xs font-semibold uppercase tracking-widest"
                     >
                       {creating ? 'Creating...' : 'Create Project'}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </div>

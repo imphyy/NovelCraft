@@ -5,6 +5,8 @@ import type { WikiPage, WikiPageType } from '../types/wiki';
 import { WIKI_PAGE_TYPES } from '../types/wiki';
 import { AppShell } from '../components/layout/AppShell';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '../components/scaffolding/EmptyState';
+import { SectionHeader } from '../components/scaffolding/SectionHeader';
 import { Library } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -136,76 +138,134 @@ export default function WikiListPage() {
       title="Project Wiki"
       leftContext={leftContext}
       main={
-        <div className="py-4">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold font-serif">Wiki</h2>
-            <Button onClick={() => setShowCreateModal(true)}>
-              New Page
-            </Button>
-          </div>
+        <div className="py-4 space-y-8">
+          <SectionHeader
+            title="Lore Wiki"
+            subtitle="Characters, places, factions, and world-building"
+            actions={
+              <Button onClick={() => setShowCreateModal(true)} size="sm" className="rounded-none px-6 h-9 text-xs font-semibold uppercase tracking-widest">
+                New Page
+              </Button>
+            }
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredPages.length === 0 ? (
-              <div className="col-span-full py-12 text-center text-muted-foreground bg-muted/20 rounded-lg border border-dashed border-border">
-                No pages found. Create one to get started!
-              </div>
+          {filteredPages.length === 0 ? (
+            pages.length === 0 ? (
+              <EmptyState
+                icon={<Library className="h-16 w-16" />}
+                title="Build your story's encyclopedia"
+                description="Create wiki pages to document characters, locations, events, and lore. Keep everything consistent and searchable."
+                primaryAction={{
+                  label: 'Create First Wiki Page',
+                  onClick: () => setShowCreateModal(true),
+                }}
+                steps={[
+                  {
+                    number: 1,
+                    title: 'Create a character page for your protagonist',
+                    action: {
+                      label: 'New Character',
+                      onClick: () => {
+                        setPageType('character');
+                        setShowCreateModal(true);
+                      },
+                    },
+                  },
+                  {
+                    number: 2,
+                    title: 'Document key locations in your world',
+                    action: {
+                      label: 'New Location',
+                      onClick: () => {
+                        setPageType('location');
+                        setShowCreateModal(true);
+                      },
+                    },
+                  },
+                  {
+                    number: 3,
+                    title: 'Define factions, items, or concepts',
+                    action: {
+                      label: 'New Page',
+                      onClick: () => setShowCreateModal(true),
+                    },
+                  },
+                ]}
+              />
             ) : (
-              filteredPages.map((page) => (
-                <div
-                  key={page.id}
-                  onClick={() => navigate(`/projects/${projectId}/wiki/${page.id}`)}
-                  className="p-4 bg-card/50 border border-border/50 rounded-lg hover:border-primary/50 hover:shadow-paperSm transition-all cursor-pointer group"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-2xl" role="img" aria-label={page.pageType}>
-                      {getTypeIcon(page.pageType)}
-                    </span>
-                    <span className="text-[10px] font-medium uppercase text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded">
-                      {page.pageType}
-                    </span>
-                  </div>
-                  <h3 className="font-bold group-hover:text-primary transition-colors mb-1 font-serif">
-                    {page.title}
-                  </h3>
-                  {page.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-3">
-                      {page.tags.slice(0, 3).map(tag => (
-                        <span key={tag} className="text-[10px] bg-muted/50 text-muted-foreground px-1 py-0.5 rounded">
-                          #{tag}
-                        </span>
-                      ))}
-                      {page.tags.length > 3 && (
-                        <span className="text-[10px] text-muted-foreground">+{page.tags.length - 3}</span>
-                      )}
+              <div className="py-20 text-center">
+                <p className="text-sm text-muted-foreground/60 italic">
+                  No pages match this filter. Try selecting "All Pages" or create a new page.
+                </p>
+              </div>
+            )
+          ) : (
+            <>
+              <div className="flex items-baseline justify-between mb-4">
+                <p className="text-xs text-muted-foreground">
+                  {filteredPages.length} {filteredPages.length === 1 ? 'page' : 'pages'}
+                  {selectedType !== 'all' && ` • ${WIKI_PAGE_TYPES.find(t => t.value === selectedType)?.label}`}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {filteredPages.map((page) => (
+                  <div
+                    key={page.id}
+                    onClick={() => navigate(`/projects/${projectId}/wiki/${page.id}`)}
+                    className="p-5 bg-muted/5 border border-border/40 rounded-sm hover:border-primary/40 hover:bg-muted/10 transition-all cursor-pointer group shadow-none hover:shadow-sm"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <span className="text-xl opacity-80 group-hover:opacity-100 transition-opacity" role="img" aria-label={page.pageType}>
+                        {getTypeIcon(page.pageType)}
+                      </span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50 bg-muted/20 px-1.5 py-0.5 rounded">
+                        {page.pageType}
+                      </span>
                     </div>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
+                    <h3 className="text-lg font-medium group-hover:text-primary transition-colors mb-1 font-serif">
+                      {page.title}
+                    </h3>
+                    {page.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-4">
+                        {page.tags.slice(0, 3).map(tag => (
+                          <span key={tag} className="text-[10px] bg-primary/5 text-primary/70 px-1.5 py-0.5 rounded-sm border border-primary/10">
+                            #{tag}
+                          </span>
+                        ))}
+                        {page.tags.length > 3 && (
+                          <span className="text-[10px] text-muted-foreground/50 self-center ml-1">+{page.tags.length - 3} more</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
           {/* Create Modal */}
           {showCreateModal && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="bg-card rounded-xl shadow-paper max-w-md w-full p-8 border border-border">
-                <h3 className="text-2xl font-bold mb-6 font-serif">New Wiki Page</h3>
-                <form onSubmit={handleCreatePage} className="space-y-4">
+              <div className="bg-card rounded-sm shadow-paper max-w-md w-full p-8 border border-border/80">
+                <h3 className="text-2xl font-semibold mb-6 font-serif">New Wiki Page</h3>
+                <form onSubmit={handleCreatePage} className="space-y-5">
                   {error && (
-                    <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-2 rounded text-sm">
+                    <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-2 rounded-md text-xs">
                       {error}
                     </div>
                   )}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Title</label>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1.5">Title</label>
                     <input
                       required
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="w-full px-4 py-2 bg-background border border-border rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
+                      className="w-full px-4 py-2.5 bg-muted/10 border border-border/40 rounded-md focus:outline-none focus:ring-1 focus:ring-ring text-sm transition-all"
+                      placeholder="Page Title"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Type</label>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1.5">Type</label>
                     <div className="grid grid-cols-2 gap-2">
                       {WIKI_PAGE_TYPES.map(type => (
                         <button
@@ -213,10 +273,10 @@ export default function WikiListPage() {
                           type="button"
                           onClick={() => setPageType(type.value)}
                           className={cn(
-                            "px-3 py-2 rounded-md text-xs font-medium border transition-colors",
+                            "px-3 py-2.5 rounded-md text-xs font-medium border transition-all",
                             pageType === type.value
-                              ? "bg-primary/10 border-primary text-primary"
-                              : "bg-background border-border text-muted-foreground hover:bg-muted"
+                              ? "bg-primary/5 border-primary/40 text-primary shadow-sm"
+                              : "bg-transparent border-border/40 text-muted-foreground/70 hover:bg-muted/10"
                           )}
                         >
                           {type.icon} {type.label}
@@ -224,11 +284,11 @@ export default function WikiListPage() {
                       ))}
                     </div>
                   </div>
-                  <div className="flex justify-end gap-3 mt-6">
-                    <Button variant="ghost" type="button" onClick={() => setShowCreateModal(false)}>
+                  <div className="flex justify-end gap-3 mt-10">
+                    <Button variant="ghost" type="button" onClick={() => setShowCreateModal(false)} className="text-sm">
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={creating}>
+                    <Button type="submit" disabled={creating} className="text-sm px-6">
                       {creating ? 'Creating...' : 'Create Page'}
                     </Button>
                   </div>

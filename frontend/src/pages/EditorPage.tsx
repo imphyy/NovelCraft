@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { projectsAPI, chaptersAPI } from '../api/client';
-import { useAuth } from '../contexts/AuthContext';
 import { RewriteModal } from '../components/RewriteModal';
 import { AppShell } from '../components/layout/AppShell';
+import { EmptyState } from '../components/scaffolding/EmptyState';
 import { Book } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,7 +24,6 @@ interface Chapter {
 export default function EditorPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const { logout } = useAuth();
 
   const [project, setProject] = useState<Project | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -36,7 +35,7 @@ export default function EditorPage() {
   const [newChapterTitle, setNewChapterTitle] = useState('');
   const [error, setError] = useState('');
   const [showRewriteModal, setShowRewriteModal] = useState(false);
-  const [selectedText, setSelectedText] = useState('');
+  const [selectedText] = useState('');
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lastSavedContent = useRef('');
@@ -131,28 +130,6 @@ export default function EditorPage() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (err) {
-      console.error('Failed to logout:', err);
-    }
-  };
-
-  const handleOpenRewrite = () => {
-    if (!textareaRef.current) return;
-
-    const start = textareaRef.current.selectionStart;
-    const end = textareaRef.current.selectionEnd;
-    const text = content.substring(start, end);
-
-    if (text.trim()) {
-      setSelectedText(text);
-      setShowRewriteModal(true);
-    }
-  };
-
   const handleAcceptRewrite = (newText: string) => {
     if (!textareaRef.current) return;
 
@@ -172,15 +149,15 @@ export default function EditorPage() {
   }
 
   const leftContext = (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+    <div className="flex flex-col h-full font-sans">
+      <div className="flex items-center justify-between mb-6 px-1">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/50 flex items-center gap-2">
           <Book className="h-3 w-3" />
           Chapters
         </h2>
         <button
           onClick={() => setShowNewChapter(true)}
-          className="text-xs text-primary hover:underline font-medium"
+          className="text-[10px] text-primary/60 hover:text-primary transition-colors uppercase tracking-widest font-semibold"
         >
           + New
         </button>
@@ -188,11 +165,8 @@ export default function EditorPage() {
 
       {showNewChapter && (
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleCreateChapter();
-          }}
-          className="mb-4 p-2 bg-muted/50 rounded-lg border border-border shadow-sm"
+          onSubmit={handleCreateChapter}
+          className="mb-6 p-3 bg-muted/10 rounded border border-border/10"
         >
           {error && (
             <div className="text-[10px] text-destructive mb-2">{error}</div>
@@ -202,13 +176,13 @@ export default function EditorPage() {
             value={newChapterTitle}
             onChange={(e) => setNewChapterTitle(e.target.value)}
             placeholder="Chapter title"
-            className="w-full px-2 py-1.5 text-xs border border-border rounded mb-2 bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full px-2 py-1.5 text-xs border border-border/10 rounded mb-2 bg-transparent focus:outline-none focus:ring-1 focus:ring-primary/30"
             autoFocus
           />
           <div className="flex gap-2">
             <button
               type="submit"
-              className="flex-1 px-2 py-1 text-[10px] bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+              className="flex-1 px-2 py-1 text-[10px] bg-primary/80 text-primary-foreground rounded hover:opacity-90 transition-opacity uppercase tracking-widest font-semibold"
             >
               Create
             </button>
@@ -219,7 +193,7 @@ export default function EditorPage() {
                 setNewChapterTitle('');
                 setError('');
               }}
-              className="flex-1 px-2 py-1 text-[10px] text-muted-foreground hover:bg-background rounded transition-colors"
+              className="flex-1 px-2 py-1 text-[10px] text-muted-foreground/60 hover:text-foreground transition-colors uppercase tracking-widest font-semibold"
             >
               Cancel
             </button>
@@ -228,9 +202,25 @@ export default function EditorPage() {
       )}
 
       {chapters.length === 0 ? (
-        <p className="text-xs text-muted-foreground text-center py-8 italic">
-          No chapters yet
-        </p>
+        <div className="py-8 px-2">
+          <p className="text-[10px] text-muted-foreground/40 text-center italic uppercase tracking-widest mb-4">
+            No chapters yet
+          </p>
+          <div className="space-y-2 text-[10px] text-muted-foreground/50 leading-relaxed">
+            <p className="flex items-start gap-2">
+              <span className="opacity-60">•</span>
+              <span>Start with a chapter title that captures your opening scene</span>
+            </p>
+            <p className="flex items-start gap-2">
+              <span className="opacity-60">•</span>
+              <span>Build your world in the wiki first if you need structure</span>
+            </p>
+            <p className="flex items-start gap-2">
+              <span className="opacity-60">•</span>
+              <span>Use the AI assistant to brainstorm ideas</span>
+            </p>
+          </div>
+        </div>
       ) : (
         <div className="space-y-1">
           {chapters.map((chapter) => (
@@ -238,14 +228,14 @@ export default function EditorPage() {
               key={chapter.id}
               onClick={() => setSelectedChapter(chapter)}
               className={cn(
-                "w-full text-left px-3 py-2 rounded text-xs transition-all",
+                "w-full text-left px-3 py-2.5 rounded text-xs transition-all",
                 selectedChapter?.id === chapter.id
-                  ? "bg-accent text-accent-foreground font-medium shadow-sm ring-1 ring-border"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-muted/40 text-foreground font-medium border-l-2 border-primary/40 pl-2.5"
+                  : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/20"
               )}
             >
               <div className="font-medium truncate">{chapter.title}</div>
-              <div className="text-[10px] opacity-70 mt-0.5">
+              <div className="text-[9px] opacity-50 mt-1 uppercase tracking-widest">
                 {chapter.wordCount} words
               </div>
             </button>
@@ -256,36 +246,63 @@ export default function EditorPage() {
   );
 
   return (
-    <AppShell
-      title={project?.name}
-      leftContext={leftContext}
-      main={
-        selectedChapter ? (
-          <div className="h-full flex flex-col">
-            <div className="border-b border-border/50 pb-4 mb-6">
-              <h2 className="text-2xl font-bold text-foreground font-serif">
-                {selectedChapter.title}
-              </h2>
-              {saving && <span className="text-[10px] text-muted-foreground animate-pulse ml-2 italic">Saving...</span>}
+    <>
+      <AppShell
+        title={project?.name}
+        leftContext={leftContext}
+        main={
+          selectedChapter ? (
+            <div className="h-full flex flex-col">
+              <div className="border-b border-border/10 pb-6 mb-10 flex items-baseline justify-between">
+                <h2 className="text-3xl font-semibold text-foreground font-serif tracking-tight">
+                  {selectedChapter.title}
+                </h2>
+                <div className="flex items-center gap-4">
+                  {saving && <span className="text-[10px] text-muted-foreground/40 animate-pulse italic">Saving...</span>}
+                  <span className="text-[10px] text-muted-foreground/30 uppercase tracking-[0.2em]">{selectedChapter.wordCount} words</span>
+                </div>
+              </div>
+              <div className="flex-1">
+                <textarea
+                  ref={textareaRef}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="w-full h-[65vh] text-foreground resize-none focus:outline-none bg-transparent font-serif leading-relaxed text-lg md:text-xl placeholder:text-muted-foreground/20 selection:bg-primary/10"
+                  placeholder="Once upon a time..."
+                />
+              </div>
             </div>
-            <div className="flex-1">
-              <textarea
-                ref={textareaRef}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="w-full h-[65vh] text-foreground resize-none focus:outline-none bg-transparent font-serif leading-relaxed text-lg md:text-xl placeholder:opacity-30"
-                placeholder="Once upon a time..."
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-20">
-            <Book className="h-12 w-12 mb-4 opacity-20" />
-            <p>Select a chapter or create a new one to start writing</p>
-          </div>
-        )
-      }
-    >
+          ) : (
+            <EmptyState
+              icon={<Book className="h-16 w-16" />}
+              title="Ready to write?"
+              description="Select a chapter from the sidebar to begin writing, or create your first chapter to start your manuscript."
+              primaryAction={{
+                label: 'Create First Chapter',
+                onClick: () => setShowNewChapter(true),
+              }}
+              secondaryAction={{
+                label: 'Open Wiki',
+                onClick: () => navigate(`/projects/${projectId}/wiki`),
+              }}
+              steps={[
+                {
+                  number: 1,
+                  title: 'Create a chapter to begin your manuscript',
+                },
+                {
+                  number: 2,
+                  title: 'Document characters and lore in the wiki',
+                },
+                {
+                  number: 3,
+                  title: 'Ask the AI assistant for help with plot or consistency',
+                },
+              ]}
+            />
+          )
+        }
+      />
       {/* Rewrite Modal */}
       {selectedChapter && (
         <RewriteModal
@@ -296,6 +313,6 @@ export default function EditorPage() {
           onAccept={handleAcceptRewrite}
         />
       )}
-    </AppShell>
+    </>
   );
 }

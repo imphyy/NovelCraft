@@ -44,22 +44,22 @@ export function AppShell({
       <div className="flex-1 flex overflow-hidden h-[calc(100vh-3.5rem)]">
         {/* Desktop Left Sidebar */}
         {!hideLeft && (
-          <aside className="hidden md:flex w-[300px] flex-col border-r border-border shrink-0">
+          <aside className="hidden md:flex w-[300px] flex-col shrink-0">
             {leftNav || <LeftSidebar context={leftContext} />}
           </aside>
         )}
 
         {/* Mobile Left Drawer */}
         <Dialog open={isLeftOpen} onOpenChange={setIsLeftOpen}>
-          <DialogContent className="fixed left-0 top-0 bottom-0 w-[280px] p-0 h-full translate-x-0 translate-y-0 rounded-none border-r border-border sm:rounded-none outline-none">
-            <div className="h-full pt-14 bg-card">
+          <DialogContent className="fixed left-0 top-0 bottom-0 w-[280px] p-0 h-full translate-x-0 translate-y-0 rounded-none border-r border-border/10 sm:rounded-none outline-none">
+            <div className="h-full pt-14 bg-muted/20">
                {leftNav || <LeftSidebar context={leftContext} />}
             </div>
           </DialogContent>
         </Dialog>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto bg-background/50">
+        <main className="flex-1 overflow-y-auto bg-muted/20">
           <PageMargin>
             <PaperSheet className="flex-1">
               {main}
@@ -69,15 +69,15 @@ export function AppShell({
 
         {/* Desktop Right Sidebar */}
         {!hideRight && (
-          <aside className="hidden lg:flex w-[400px] flex-col border-l border-border shrink-0">
+          <aside className="hidden lg:flex w-[400px] flex-col shrink-0">
             {rightPanel || <RightSidebar />}
           </aside>
         )}
 
         {/* Mobile Right Drawer */}
         <Dialog open={isRightOpen} onOpenChange={setIsRightOpen}>
-          <DialogContent className="fixed right-0 top-0 bottom-0 w-[320px] p-0 h-full translate-x-0 translate-y-0 rounded-none border-l border-border sm:rounded-none left-auto outline-none">
-             <div className="h-full pt-14 bg-card">
+          <DialogContent className="fixed right-0 top-0 bottom-0 w-[320px] p-0 h-full translate-x-0 translate-y-0 rounded-none border-l border-border/10 sm:rounded-none left-auto outline-none">
+             <div className="h-full pt-14 bg-muted/20">
                 {rightPanel || <RightSidebar />}
              </div>
           </DialogContent>

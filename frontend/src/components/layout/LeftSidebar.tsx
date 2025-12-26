@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
-import { Book, Library, Search, Home } from 'lucide-react';
+import { Book, Library, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LeftSidebarProps {
@@ -16,11 +16,10 @@ export function LeftSidebar({ context }: LeftSidebarProps) {
       { name: 'Chapters', icon: Book, href: `/projects/${projectId}/editor` },
       { name: 'Wiki', icon: Library, href: `/projects/${projectId}/wiki` },
     ] : []),
-    { name: 'Global Search', icon: Search, href: '/search' },
   ];
 
   return (
-    <aside className="flex flex-col h-full bg-card/40">
+    <aside className="flex flex-col h-full bg-muted/20 border-r border-border/10">
       <nav className="p-4 space-y-1">
         {navItems.map((item) => (
           <NavLink
@@ -28,10 +27,10 @@ export function LeftSidebar({ context }: LeftSidebarProps) {
             to={item.href}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
+                "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-200 font-sans",
                 isActive
-                  ? "bg-muted/60 text-foreground border-l-2 border-primary pl-2.5 shadow-sm"
-                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                  ? "bg-muted/40 text-foreground border-l-2 border-primary/50 pl-2.5 font-medium"
+                  : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
               )
             }
           >
@@ -42,8 +41,8 @@ export function LeftSidebar({ context }: LeftSidebarProps) {
       </nav>
 
       {context && (
-        <div className="flex-1 overflow-y-auto border-t border-border/50 mt-2 p-4">
-          <div className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider mb-4 px-2">
+        <div className="flex-1 overflow-y-auto border-t border-border/40 mt-2 p-4">
+          <div className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.1em] mb-4 px-2">
             Context
           </div>
           {context}

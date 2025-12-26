@@ -9,45 +9,45 @@
   --radius: 12px;
 
   /* Parchment (Light) — warm paper + ink */
-  --background: 40 38% 93%;          /* parchment base */
-  --foreground: 28 34% 14%;          /* ink */
+  --background: 40 38% 92%;          /* parchment base */
+  --foreground: 28 34% 12%;          /* ink */
 
   --card: 40 50% 96%;                /* page surface */
-  --card-foreground: 28 34% 14%;
+  --card-foreground: 28 34% 12%;
 
   --popover: 40 50% 96%;
-  --popover-foreground: 28 34% 14%;
+  --popover-foreground: 28 34% 12%;
 
-  --muted: 36 24% 88%;
-  --muted-foreground: 28 18% 32%;
+  --muted: 36 24% 86%;
+  --muted-foreground: 28 18% 30%;
 
-  --border: 34 20% 78%;
-  --input: 34 20% 78%;
-  --ring: 35 55% 38%;                /* sepia focus ring */
+  --border: 34 20% 75%;
+  --input: 34 20% 75%;
+  --ring: 35 55% 35%;                /* sepia focus ring */
 
   /* Buttons/accents — sepia / brass */
-  --primary: 35 55% 33%;
+  --primary: 35 55% 30%;
   --primary-foreground: 40 50% 96%;
 
-  --secondary: 36 26% 86%;
-  --secondary-foreground: 28 34% 14%;
+  --secondary: 36 26% 84%;
+  --secondary-foreground: 28 34% 12%;
 
-  --accent: 38 45% 80%;
-  --accent-foreground: 28 34% 14%;
+  --accent: 38 45% 78%;
+  --accent-foreground: 28 34% 12%;
 
   --destructive: 0 70% 45%;
   --destructive-foreground: 40 50% 96%;
 
   /* Extra semantic "ink" shades */
-  --ink: 28 34% 14%;
-  --ink-muted: 28 18% 32%;
-  --ink-faint: 28 12% 45%;
+  --ink: 28 34% 12%;
+  --ink-muted: 28 18% 30%;
+  --ink-faint: 28 12% 42%;
 
   /* Extra parchment tokens */
-  --parchment-base: 40 38% 93%;
+  --parchment-base: 40 38% 92%;
   --parchment-surface: 40 50% 96%;
-  --parchment-edge: 34 20% 78%;
-  --parchment-stain: 35 40% 70%;
+  --parchment-edge: 34 20% 75%;
+  --parchment-stain: 35 40% 65%;
 
   /* Optional paper texture */
   --paper-texture: none;
@@ -55,42 +55,42 @@
 
 .dark {
   /* Night parchment — warm dark, not "black UI" */
-  --background: 28 20% 10%;          /* deep warm */
-  --foreground: 40 34% 86%;          /* parchment ink-light */
+  --background: 28 20% 8%;           /* deeper warm */
+  --foreground: 40 34% 84%;          /* parchment ink-light */
 
-  --card: 28 18% 13%;
-  --card-foreground: 40 34% 86%;
+  --card: 28 18% 12%;
+  --card-foreground: 40 34% 84%;
 
-  --popover: 28 18% 13%;
-  --popover-foreground: 40 34% 86%;
+  --popover: 28 18% 12%;
+  --popover-foreground: 40 34% 84%;
 
-  --muted: 28 14% 18%;
-  --muted-foreground: 38 18% 70%;
+  --muted: 28 14% 15%;
+  --muted-foreground: 38 15% 65%;
 
-  --border: 28 12% 22%;
-  --input: 28 12% 22%;
-  --ring: 40 45% 62%;                /* candlelight focus */
+  --border: 28 12% 18%;
+  --input: 28 12% 18%;
+  --ring: 40 40% 55%;                /* candlelight focus */
 
-  --primary: 40 45% 62%;
-  --primary-foreground: 28 20% 10%;
+  --primary: 40 40% 55%;
+  --primary-foreground: 28 20% 8%;
 
-  --secondary: 28 14% 18%;
-  --secondary-foreground: 40 34% 86%;
+  --secondary: 28 14% 15%;
+  --secondary-foreground: 40 34% 84%;
 
-  --accent: 28 14% 20%;
-  --accent-foreground: 40 34% 86%;
+  --accent: 28 14% 18%;
+  --accent-foreground: 40 34% 84%;
 
-  --destructive: 0 62% 45%;
-  --destructive-foreground: 40 34% 86%;
+  --destructive: 0 60% 40%;
+  --destructive-foreground: 40 34% 84%;
 
-  --ink: 40 34% 86%;
-  --ink-muted: 38 18% 70%;
-  --ink-faint: 36 12% 58%;
+  --ink: 40 34% 84%;
+  --ink-muted: 38 15% 65%;
+  --ink-faint: 36 12% 52%;
 
-  --parchment-base: 28 20% 10%;
-  --parchment-surface: 28 18% 13%;
-  --parchment-edge: 28 12% 22%;
-  --parchment-stain: 35 18% 28%;
+  --parchment-base: 28 20% 8%;
+  --parchment-surface: 28 18% 12%;
+  --parchment-edge: 28 12% 18%;
+  --parchment-stain: 35 18% 25%;
 
   --paper-texture: none;
 }

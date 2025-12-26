@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 import { aiAPI } from '@/api/client';
 import type { AskResponse } from '@/types/ai';
@@ -37,98 +35,144 @@ export function AskAI({ projectId }: AskAIProps) {
     }
   };
 
+  const examplePrompts = [
+    "Summarize the protagonist's character arc so far",
+    "List all unresolved plot threads in the manuscript",
+    "What contradictions exist in the world-building?",
+    "Describe the relationships between main characters",
+    "What's the timeline of major events?",
+  ];
+
+  const handleExampleClick = (prompt: string) => {
+    setQuestion(prompt);
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Ask Your Novel</CardTitle>
-        <CardDescription>
-          Ask questions about your chapters and wiki using AI
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="question">Question</Label>
-          <Textarea
-            id="question"
-            placeholder="e.g., What color are Rhea's eyes? Where was the crystal first mentioned?"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            rows={3}
-          />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="canonSafe"
-            checked={canonSafe}
-            onCheckedChange={(checked) => setCanonSafe(checked as boolean)}
-          />
-          <Label
-            htmlFor="canonSafe"
-            className="text-sm font-normal cursor-pointer"
-          >
-            Canon-safe mode (only use existing text, don't invent facts)
-          </Label>
-        </div>
-
-        <Button
-          onClick={handleAsk}
-          disabled={loading || !question.trim()}
-          className="w-full"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Searching...
-            </>
-          ) : (
-            'Ask'
-          )}
-        </Button>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        {response && (
-          <div className="space-y-4 mt-6">
-            <div className="border-l-4 border-primary pl-4 py-2">
-              <h3 className="font-semibold mb-2">Answer</h3>
-              <p className="text-sm whitespace-pre-wrap">{response.answer}</p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Tokens: {response.tokensIn} in / {response.tokensOut} out
-              </p>
-            </div>
-
-            {response.citations.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-2">Sources ({response.citations.length})</h3>
-                <div className="space-y-2">
-                  {response.citations.map((citation, idx) => (
-                    <Card key={citation.chunkId} className="bg-muted/50">
-                      <CardContent className="p-3">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-xs font-medium">
-                            Source {idx + 1} - {citation.sourceType === 'chapter' ? 'Chapter' : 'Wiki Page'}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {(citation.similarity * 100).toFixed(1)}% match
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground line-clamp-3">
-                          {citation.content}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
+    <div className="space-y-12">
+      {!response && !loading && (
+        <div className="space-y-6 pb-8 border-b border-border/10">
+          <div className="space-y-2">
+            <h3 className="text-lg font-serif text-foreground">How can I help?</h3>
+            <p className="text-xs text-muted-foreground/70 leading-relaxed">
+              Ask questions about your manuscript, check for consistency, or explore your story's themes and structure.
+            </p>
           </div>
-        )}
-      </CardContent>
-    </Card>
+          <div className="space-y-3">
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+              Example Prompts
+            </p>
+            <div className="grid grid-cols-1 gap-2">
+              {examplePrompts.map((prompt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleExampleClick(prompt)}
+                  className="text-left px-4 py-3 bg-muted/5 border border-border/20 rounded-sm hover:border-primary/30 hover:bg-muted/10 transition-all group"
+                >
+                  <p className="text-sm text-foreground/80 group-hover:text-primary transition-colors">
+                    "{prompt}"
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <h3 className="text-2xl font-serif">Ask Your Manuscript</h3>
+          <p className="text-sm text-muted-foreground italic">
+            Query your chapters and world knowledge for consistency.
+          </p>
+        </div>
+
+        <div className="space-y-6 pt-4 max-w-2xl">
+          <div className="space-y-3">
+            <Label htmlFor="question" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Question</Label>
+            <Textarea
+              id="question"
+              placeholder="e.g., What color are Rhea's eyes?"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              rows={3}
+              className="bg-transparent border-border/40 focus:border-primary transition-colors resize-none font-serif text-lg"
+            />
+          </div>
+
+          <div className="flex items-center space-x-3">
+            <Checkbox
+              id="canonSafe"
+              checked={canonSafe}
+              onCheckedChange={(checked) => setCanonSafe(checked as boolean)}
+              className="rounded-none border-border/60"
+            />
+            <Label
+              htmlFor="canonSafe"
+              className="text-xs text-muted-foreground font-normal cursor-pointer"
+            >
+              Canon-safe mode (only use existing text, don't invent facts)
+            </Label>
+          </div>
+
+          <Button
+            onClick={handleAsk}
+            disabled={loading || !question.trim()}
+            className="rounded-none px-8 h-10 text-xs font-semibold uppercase tracking-widest"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                Searching...
+              </>
+            ) : (
+              'Query Manuscript'
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-destructive/5 text-destructive text-xs px-4 py-3 border-l-2 border-destructive max-w-2xl">
+          {error}
+        </div>
+      )}
+
+      {response && (
+        <div className="space-y-12 animate-in fade-in duration-500">
+          <div className="space-y-4 max-w-3xl">
+            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] border-b border-border/10 pb-2">Response</h4>
+            <div className="text-xl font-serif leading-relaxed text-foreground/90 whitespace-pre-wrap">
+              {response.answer}
+            </div>
+            <p className="text-[10px] text-muted-foreground/30 uppercase tracking-widest pt-4">
+              Metadata: {response.tokensIn} tokens in / {response.tokensOut} tokens out
+            </p>
+          </div>
+
+          {response.citations.length > 0 && (
+            <div className="space-y-6">
+              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Source Fragments</h4>
+              <div className="space-y-0 border-t border-border/10">
+                {response.citations.map((citation, idx) => (
+                  <div key={citation.chunkId} className="py-8 border-b border-border/5 group">
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                        Source {idx + 1} — {citation.sourceType === 'chapter' ? 'Chapter' : 'Wiki Page'}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/20 italic">
+                        {(citation.similarity * 100).toFixed(1)}% relevance
+                      </span>
+                    </div>
+                    <p className="text-base font-serif text-muted-foreground/80 leading-relaxed max-w-3xl italic">
+                      “{citation.content}”
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
