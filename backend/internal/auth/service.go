@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -84,37 +85,43 @@ func (s *Service) Login(ctx context.Context, email, password string) (string, er
 		return "", fmt.Errorf("failed to generate token: %w", err)
 	}
 
+	// Hash the token before storing
+	tokenHash := hashToken(token)
 	expiresAt := time.Now().Add(SessionDuration)
 
 	_, err = s.db.Exec(ctx, `
-		INSERT INTO sessions (user_id, token, expires_at)
+		INSERT INTO sessions (user_id, token_hash, expires_at)
 		VALUES ($1, $2, $3)
-	`, userID, token, expiresAt)
+	`, userID, tokenHash, expiresAt)
 
 	if err != nil {
 		return "", fmt.Errorf("failed to create session: %w", err)
 	}
 
+	// Return the raw token (not the hash) - this goes in the cookie
 	return token, nil
 }
 
 // Logout invalidates a session
 func (s *Service) Logout(ctx context.Context, token string) error {
+	tokenHash := hashToken(token)
 	_, err := s.db.Exec(ctx, `
-		DELETE FROM sessions WHERE token = $1
-	`, token)
+		DELETE FROM sessions WHERE token_hash = $1
+	`, tokenHash)
 
 	return err
 }
 
 // ValidateSession checks if a session is valid and returns the user ID
 func (s *Service) ValidateSession(ctx context.Context, token string) (string, error) {
+	tokenHash := hashToken(token)
+
 	var userID string
 	var expiresAt time.Time
 
 	err := s.db.QueryRow(ctx, `
-		SELECT user_id, expires_at FROM sessions WHERE token = $1
-	`, token).Scan(&userID, &expiresAt)
+		SELECT user_id, expires_at FROM sessions WHERE token_hash = $1
+	`, tokenHash).Scan(&userID, &expiresAt)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -126,7 +133,7 @@ func (s *Service) ValidateSession(ctx context.Context, token string) (string, er
 	// Check if expired
 	if time.Now().After(expiresAt) {
 		// Clean up expired session
-		_, _ = s.db.Exec(ctx, `DELETE FROM sessions WHERE token = $1`, token)
+		_, _ = s.db.Exec(ctx, `DELETE FROM sessions WHERE token_hash = $1`, tokenHash)
 		return "", ErrSessionExpired
 	}
 
@@ -157,6 +164,12 @@ func generateToken() (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
+}
+
+// hashToken creates a SHA-256 hash of the token for storage
+func hashToken(token string) string {
+	hash := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(hash[:])
 }
 
 type User struct {
