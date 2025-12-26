@@ -3,6 +3,8 @@ package ai
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -114,14 +116,18 @@ func (s *DocumentService) DeleteDocument(ctx context.Context, sourceType, source
 	return err
 }
 
-// joinFloats converts []float32 to comma-separated string
+// joinFloats converts []float32 to comma-separated string with full precision
 func joinFloats(floats []float32) string {
 	if len(floats) == 0 {
 		return ""
 	}
-	result := fmt.Sprintf("%f", floats[0])
+	// Use strings.Builder for efficient string concatenation
+	var builder strings.Builder
+	// Use 'g' format with -1 precision to preserve full float32 precision
+	builder.WriteString(strconv.FormatFloat(float64(floats[0]), 'g', -1, 32))
 	for i := 1; i < len(floats); i++ {
-		result += fmt.Sprintf(",%f", floats[i])
+		builder.WriteString(",")
+		builder.WriteString(strconv.FormatFloat(float64(floats[i]), 'g', -1, 32))
 	}
-	return result
+	return builder.String()
 }
