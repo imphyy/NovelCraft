@@ -15,41 +15,41 @@ interface RightSidebarProps {
 export function RightSidebar({ panel, projectId, selectedText = '', onRewrite }: RightSidebarProps) {
   if (panel) {
     return (
-      <aside className="flex flex-col h-full bg-muted/30 overflow-y-auto border-l border-border/10 font-sans">
+      <aside className="flex flex-col h-full bg-card/30 backdrop-blur-sm overflow-y-auto border-l border-border font-sans">
         {panel}
       </aside>
     );
   }
 
   return (
-    <aside className="flex flex-col h-full bg-muted/30 border-l border-border/10 font-sans">
+    <aside className="flex flex-col h-full bg-card/30 backdrop-blur-sm border-l border-border font-sans">
       <Tabs defaultValue="ask" className="flex flex-col h-full">
-        <TabsList className="grid grid-cols-4 bg-transparent rounded-none border-b border-border/10 h-10">
-          <TabsTrigger 
-            value="ask" 
+        <TabsList className="grid grid-cols-4 bg-transparent rounded-none border-b border-border h-10">
+          <TabsTrigger
+            value="ask"
             title="Ask AI"
-            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary/40 rounded-none border-r border-border/10 last:border-r-0 h-full text-muted-foreground/40 transition-all scale-90"
+            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none border-r border-border last:border-r-0 h-full text-muted-foreground transition-all scale-90"
           >
             <Sparkles className="h-4 w-4" />
           </TabsTrigger>
-          <TabsTrigger 
-            value="rewrite" 
+          <TabsTrigger
+            value="rewrite"
             title="Rewrite"
-            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary/40 rounded-none border-r border-border/10 last:border-r-0 h-full text-muted-foreground/40 transition-all scale-90"
+            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none border-r border-border last:border-r-0 h-full text-muted-foreground transition-all scale-90"
           >
             <History className="h-4 w-4" />
           </TabsTrigger>
-          <TabsTrigger 
-            value="notes" 
+          <TabsTrigger
+            value="notes"
             title="Notes"
-            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary/40 rounded-none border-r border-border/10 last:border-r-0 h-full text-muted-foreground/40 transition-all scale-90"
+            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none border-r border-border last:border-r-0 h-full text-muted-foreground transition-all scale-90"
           >
             <StickyNote className="h-4 w-4" />
           </TabsTrigger>
-          <TabsTrigger 
-            value="citations" 
+          <TabsTrigger
+            value="citations"
             title="Citations"
-            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary/40 rounded-none border-r border-border/10 last:border-r-0 h-full text-muted-foreground/40 transition-all scale-90"
+            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none border-r border-border last:border-r-0 h-full text-muted-foreground transition-all scale-90"
           >
             <Link className="h-4 w-4" />
           </TabsTrigger>

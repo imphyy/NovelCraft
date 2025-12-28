@@ -6,93 +6,85 @@
   --font-serif: "Merriweather";
   --font-mono: ui-monospace;
 
-  --radius: 12px;
+  --radius: 10px;
 
-  /* Parchment (Light) — warm paper + ink */
-  --background: 40 38% 92%;          /* parchment base */
-  --foreground: 28 34% 12%;          /* ink */
+  /* Dark Fantasy Theme — Arcane Blue + Gilded Gold */
+  --background: 222 47% 11%;         /* #0F172A - Ink Black */
+  --foreground: 220 13% 91%;         /* #E5E7EB - Primary text */
 
-  --card: 40 50% 96%;                /* page surface */
-  --card-foreground: 28 34% 12%;
+  --card: 217 33% 10%;               /* #111827 - Card background */
+  --card-foreground: 220 13% 91%;
 
-  --popover: 40 50% 96%;
-  --popover-foreground: 28 34% 12%;
+  --popover: 217 33% 10%;
+  --popover-foreground: 220 13% 91%;
 
-  --muted: 36 24% 86%;
-  --muted-foreground: 28 18% 30%;
+  --muted: 217 19% 15%;              /* #1E293B - Elevated panels */
+  --muted-foreground: 215 20% 65%;   /* #94A3B8 - Secondary text */
 
-  --border: 34 20% 75%;
-  --input: 34 20% 75%;
-  --ring: 35 55% 35%;                /* sepia focus ring */
+  --border: 215 25% 27%;             /* #334155 - Borders/dividers */
+  --input: 215 25% 27%;
+  --ring: 217 91% 60%;               /* #2F80ED - Arcane Blue focus */
 
-  /* Buttons/accents — sepia / brass */
-  --primary: 35 55% 30%;
-  --primary-foreground: 40 50% 96%;
+  /* Primary - Arcane Blue */
+  --primary: 217 91% 60%;            /* #2F80ED */
+  --primary-foreground: 222 47% 11%;
 
-  --secondary: 36 26% 84%;
-  --secondary-foreground: 28 34% 12%;
+  /* Secondary - Gilded Gold */
+  --secondary: 43 71% 57%;           /* #E3B341 */
+  --secondary-foreground: 222 47% 11%;
 
-  --accent: 38 45% 78%;
-  --accent-foreground: 28 34% 12%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 220 13% 91%;
 
-  --destructive: 0 70% 45%;
-  --destructive-foreground: 40 50% 96%;
+  /* Semantic Colors */
+  --destructive: 0 72% 51%;          /* #EF4444 */
+  --destructive-foreground: 220 13% 91%;
 
-  /* Extra semantic "ink" shades */
-  --ink: 28 34% 12%;
-  --ink-muted: 28 18% 30%;
-  --ink-faint: 28 12% 42%;
+  --success: 142 71% 45%;            /* #22C55E */
+  --warning: 38 92% 50%;             /* #F59E0B */
+  --info: 199 89% 48%;               /* #38BDF8 */
 
-  /* Extra parchment tokens */
-  --parchment-base: 40 38% 92%;
-  --parchment-surface: 40 50% 96%;
-  --parchment-edge: 34 20% 75%;
-  --parchment-stain: 35 40% 65%;
-
-  /* Optional paper texture */
-  --paper-texture: none;
+  /* Shadows for depth */
+  --shadow-soft: 0 4px 20px rgba(0,0,0,0.3);
+  --shadow-medium: 0 10px 40px rgba(0,0,0,0.45);
+  --shadow-strong: 0 20px 60px rgba(0,0,0,0.6);
+  --shadow-glow-blue: 0 6px 20px rgba(47, 128, 237, 0.35);
+  --shadow-glow-gold: 0 6px 25px rgba(227, 179, 65, 0.35);
 }
 
 .dark {
-  /* Night parchment — warm dark, not "black UI" */
-  --background: 28 20% 8%;           /* deeper warm */
-  --foreground: 40 34% 84%;          /* parchment ink-light */
+  /* Dark mode uses same dark fantasy theme */
+  --background: 222 47% 11%;
+  --foreground: 220 13% 91%;
 
-  --card: 28 18% 12%;
-  --card-foreground: 40 34% 84%;
+  --card: 217 33% 10%;
+  --card-foreground: 220 13% 91%;
 
-  --popover: 28 18% 12%;
-  --popover-foreground: 40 34% 84%;
+  --popover: 217 33% 10%;
+  --popover-foreground: 220 13% 91%;
 
-  --muted: 28 14% 15%;
-  --muted-foreground: 38 15% 65%;
+  --muted: 217 19% 15%;
+  --muted-foreground: 215 20% 65%;
 
-  --border: 28 12% 18%;
-  --input: 28 12% 18%;
-  --ring: 40 40% 55%;                /* candlelight focus */
+  --border: 215 25% 27%;
+  --input: 215 25% 27%;
+  --ring: 217 91% 60%;
 
-  --primary: 40 40% 55%;
-  --primary-foreground: 28 20% 8%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 222 47% 11%;
 
-  --secondary: 28 14% 15%;
-  --secondary-foreground: 40 34% 84%;
+  --secondary: 43 71% 57%;
+  --secondary-foreground: 222 47% 11%;
 
-  --accent: 28 14% 18%;
-  --accent-foreground: 40 34% 84%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 220 13% 91%;
 
-  --destructive: 0 60% 40%;
-  --destructive-foreground: 40 34% 84%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 220 13% 91%;
 
-  --ink: 40 34% 84%;
-  --ink-muted: 38 15% 65%;
-  --ink-faint: 36 12% 52%;
-
-  --parchment-base: 28 20% 8%;
-  --parchment-surface: 28 18% 12%;
-  --parchment-edge: 28 12% 18%;
-  --parchment-stain: 35 18% 25%;
-
-  --paper-texture: none;
+  --success: 142 71% 45%;
+  --warning: 38 92% 50%;
+  --info: 199 89% 48%;
 }
 
 /* Global defaults */
@@ -105,15 +97,23 @@ html {
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
-  selection-background-color: hsl(var(--primary) / 0.2);
+  selection-background-color: hsl(var(--primary) / 0.25);
+  /* Starry background with arcane glows */
+  background-image:
+    radial-gradient(1200px 800px at 50% 0%, rgba(47,128,237,0.18), transparent 60%),
+    radial-gradient(900px 700px at 10% 20%, rgba(56,189,248,0.10), transparent 55%),
+    radial-gradient(900px 700px at 90% 30%, rgba(227,179,65,0.10), transparent 55%),
+    radial-gradient(1400px 900px at 50% 100%, rgba(0,0,0,0.55), transparent 60%);
+  background-attachment: fixed;
+  background-size: 100% 100%;
 }
 
 ::selection {
-  background-color: hsl(var(--primary) / 0.15);
+  background-color: hsl(var(--primary) / 0.25);
   color: hsl(var(--foreground));
 }
 
-/* Custom Scrollbar for parchment feel */
+/* Custom Scrollbar - Arcane Blue accent */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -129,5 +129,5 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--ink-faint));
+  background: hsl(var(--primary) / 0.5);
 }

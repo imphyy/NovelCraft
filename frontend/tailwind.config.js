@@ -58,34 +58,34 @@ export default {
           foreground: "hsl(var(--destructive-foreground))",
         },
 
-        ink: {
-          DEFAULT: "hsl(var(--ink))",
-          muted: "hsl(var(--ink-muted))",
-          faint: "hsl(var(--ink-faint))",
-        },
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+        info: "hsl(var(--info))",
 
-        parchment: {
-          base: "hsl(var(--parchment-base))",
-          surface: "hsl(var(--parchment-surface))",
-          edge: "hsl(var(--parchment-edge))",
-          stain: "hsl(var(--parchment-stain))",
-        },
+        // Theme-specific colors
+        arcane: "#2F80ED",
+        gold: "#E3B341",
       },
 
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "14px",  // Cards
+        md: "var(--radius)",  // 10px - Buttons
+        sm: "calc(var(--radius) - 2px)",
       },
 
       boxShadow: {
-        paper: "0 6px 22px rgba(0,0,0,0.10)",
-        paperSm: "0 3px 12px rgba(0,0,0,0.10)",
-        insetSoft: "inset 0 1px 0 rgba(255,255,255,0.45)",
+        soft: "var(--shadow-soft)",
+        medium: "var(--shadow-medium)",
+        strong: "var(--shadow-strong)",
+        "glow-blue": "var(--shadow-glow-blue)",
+        "glow-gold": "var(--shadow-glow-gold)",
+        "glow-blue-hover": "0 10px 30px rgba(47, 128, 237, 0.55)",
+        "glow-gold-hover": "0 10px 30px rgba(227, 179, 65, 0.55)",
       },
 
       backgroundImage: {
-        "paper-texture": "var(--paper-texture)",
+        "gradient-primary": "linear-gradient(135deg, #2F80ED 0%, #38BDF8 100%)",
+        "gradient-gold": "linear-gradient(135deg, #E3B341 0%, #F5D67B 100%)",
       },
     },
   },

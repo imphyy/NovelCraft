@@ -94,7 +94,8 @@ export default function ProjectsPage() {
             </div>
             <Button
               onClick={() => setShowCreateModal(true)}
-              className="rounded-none px-8 h-10 text-xs font-semibold uppercase tracking-widest shadow-none"
+              variant="gold"
+              className="rounded-md px-8 h-10 text-xs uppercase tracking-widest"
             >
               New Project
             </Button>
@@ -106,8 +107,8 @@ export default function ProjectsPage() {
               <p className="text-muted-foreground/60 mb-10 leading-relaxed">Your literary journey begins here. Create your first project to start writing.</p>
               <Button
                 onClick={() => setShowCreateModal(true)}
-                variant="secondary"
-                className="rounded-none px-10 h-12 text-xs font-semibold uppercase tracking-widest"
+                variant="gold"
+                className="rounded-md px-10 h-12 text-xs uppercase tracking-widest"
               >
                 Create your first project
               </Button>
@@ -188,7 +189,8 @@ export default function ProjectsPage() {
                 <Button
                   type="submit"
                   disabled={creating}
-                  className="rounded-none px-10 h-11 text-xs font-semibold uppercase tracking-widest"
+                  variant="gold"
+                  className="rounded-md px-10 h-11 text-xs uppercase tracking-widest"
                 >
                   {creating ? 'Creating...' : 'Create Project'}
                 </Button>
