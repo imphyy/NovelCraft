@@ -3,6 +3,7 @@ package chapters
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -139,11 +140,50 @@ func (h *Handler) Update(c echo.Context) error {
 	// Process document for AI (chunk and embed) in background
 	if req.Content != nil && h.documentProcessor != nil {
 		go func() {
-			if err := h.documentProcessor.ProcessDocument(context.Background(), chapter.ProjectID, "chapter", chapter.ID, chapter.Content); err != nil {
-				// Log error but don't fail - this is a background operation
-				// TODO: Add proper logging
+			defer func() {
+				if r := recover(); r != nil {
+					println("PANIC: Document embedding panicked:", r)
+				}
+			}()
+			println("DEBUG: Starting document embedding for chapter:", chapter.ID)
+			println("DEBUG: Chapter content length:", len(chapter.Content), "bytes")
+			println("DEBUG: Project ID:", chapter.ProjectID)
+
+			// Create context with timeout to prevent hanging forever
+			ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+			defer cancel()
+
+			// Start a progress ticker
+			done := make(chan bool)
+			go func() {
+				ticker := time.NewTicker(5 * time.Second)
+				defer ticker.Stop()
+				elapsed := 0
+				for {
+					select {
+					case <-ticker.C:
+						elapsed += 5
+						println("DEBUG: [PROGRESS] Embedding still in progress... elapsed:", elapsed, "seconds")
+					case <-done:
+						return
+					}
+				}
+			}()
+
+			if err := h.documentProcessor.ProcessDocument(ctx, chapter.ProjectID, "chapter", chapter.ID, chapter.Content); err != nil {
+				println("ERROR: Failed to process document for AI:", err.Error())
+			} else {
+				println("DEBUG: Successfully embedded document for chapter:", chapter.ID)
 			}
+			close(done)
 		}()
+	} else {
+		if req.Content == nil {
+			println("DEBUG: Content is nil, skipping embedding")
+		}
+		if h.documentProcessor == nil {
+			println("DEBUG: Document processor is nil (AI not configured)")
+		}
 	}
 
 	return c.JSON(http.StatusOK, chapter)

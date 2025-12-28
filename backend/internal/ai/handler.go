@@ -45,10 +45,14 @@ func (h *Handler) Ask(c echo.Context) error {
 	// TODO: Verify user owns this project (check projects service)
 	_ = userID
 
+	println("DEBUG: Processing AI question for project:", projectID)
+	println("DEBUG: Question:", req.Question)
 	resp, err := h.askService.Ask(c.Request().Context(), projectID, req.Question, req.CanonSafe, req.MaxChunks)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to process question")
+		println("ERROR: Ask service failed:", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to process question: "+err.Error())
 	}
+	println("DEBUG: Successfully processed question")
 
 	// TODO: Log AI request to database for usage tracking
 

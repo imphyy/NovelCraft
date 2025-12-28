@@ -9,6 +9,8 @@ import { EmptyState } from '../components/scaffolding/EmptyState';
 import { SectionHeader } from '../components/scaffolding/SectionHeader';
 import { Library } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Modal, ModalHeader, ModalFooter, ModalCancelButton } from '@/components/ui/modal';
+import { FormField, FormInput, FormError } from '@/components/ui/form-field';
 
 export default function WikiListPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -244,58 +246,65 @@ export default function WikiListPage() {
           )}
 
           {/* Create Modal */}
-          {showCreateModal && (
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="bg-card rounded-sm shadow-paper max-w-md w-full p-8 border border-border/80">
-                <h3 className="text-2xl font-semibold mb-6 font-serif">New Wiki Page</h3>
-                <form onSubmit={handleCreatePage} className="space-y-5">
-                  {error && (
-                    <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-2 rounded-md text-xs">
-                      {error}
-                    </div>
-                  )}
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-1.5">Title</label>
-                    <input
-                      required
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-muted/10 border border-border/40 rounded-md focus:outline-none focus:ring-1 focus:ring-ring text-sm transition-all"
-                      placeholder="Page Title"
-                    />
+          <Modal open={showCreateModal} onOpenChange={setShowCreateModal}>
+            <ModalHeader
+              title="New Wiki Page"
+              description="Document your world, characters, and lore."
+            />
+            <form onSubmit={handleCreatePage}>
+              {error && <FormError>{error}</FormError>}
+              <div className="space-y-8">
+                <FormField label="Page Title" htmlFor="title">
+                  <FormInput
+                    id="title"
+                    type="text"
+                    required
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Character Name"
+                    serif
+                  />
+                </FormField>
+                <FormField label="Page Type">
+                  <div className="grid grid-cols-2 gap-3">
+                    {WIKI_PAGE_TYPES.map(type => (
+                      <button
+                        key={type.value}
+                        type="button"
+                        onClick={() => setPageType(type.value)}
+                        className={cn(
+                          "px-4 py-3 border transition-all text-sm",
+                          pageType === type.value
+                            ? "bg-primary/5 border-primary/40 text-primary shadow-sm"
+                            : "bg-transparent border-border/30 text-muted-foreground/70 hover:bg-muted/10"
+                        )}
+                      >
+                        <span className="text-lg mr-2">{type.icon}</span>
+                        {type.label}
+                      </button>
+                    ))}
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-1.5">Type</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {WIKI_PAGE_TYPES.map(type => (
-                        <button
-                          key={type.value}
-                          type="button"
-                          onClick={() => setPageType(type.value)}
-                          className={cn(
-                            "px-3 py-2.5 rounded-md text-xs font-medium border transition-all",
-                            pageType === type.value
-                              ? "bg-primary/5 border-primary/40 text-primary shadow-sm"
-                              : "bg-transparent border-border/40 text-muted-foreground/70 hover:bg-muted/10"
-                          )}
-                        >
-                          {type.icon} {type.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex justify-end gap-3 mt-10">
-                    <Button variant="ghost" type="button" onClick={() => setShowCreateModal(false)} className="text-sm">
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={creating} className="text-sm px-6">
-                      {creating ? 'Creating...' : 'Create Page'}
-                    </Button>
-                  </div>
-                </form>
+                </FormField>
               </div>
-            </div>
-          )}
+              <ModalFooter>
+                <ModalCancelButton
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setError('');
+                    setTitle('');
+                  }}
+                  disabled={creating}
+                />
+                <Button
+                  type="submit"
+                  disabled={creating}
+                  className="rounded-none px-10 h-11 text-xs font-semibold uppercase tracking-widest"
+                >
+                  {creating ? 'Creating...' : 'Create Page'}
+                </Button>
+              </ModalFooter>
+            </form>
+          </Modal>
         </div>
       }
     />

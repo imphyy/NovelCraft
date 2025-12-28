@@ -14,6 +14,8 @@ export default function WikiEditorPage() {
 
   const [page, setPage] = useState<WikiPage | null>(null);
   const [content, setContent] = useState('');
+  const [title, setTitle] = useState('');
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [backlinks, setBacklinks] = useState<Backlink[]>([]);
@@ -34,6 +36,7 @@ export default function WikiEditorPage() {
   useEffect(() => {
     if (page) {
       setContent(page.content);
+      setTitle(page.title);
       lastSavedContent.current = page.content;
     }
   }, [page?.id]);
@@ -141,6 +144,33 @@ export default function WikiEditorPage() {
     }
   };
 
+  const handleTitleBlur = async () => {
+    if (!page || title === page.title) {
+      setIsEditingTitle(false);
+      return;
+    }
+
+    try {
+      await wikiAPI.update(page.id, { title });
+      setPage({ ...page, title });
+      setIsEditingTitle(false);
+    } catch (err) {
+      console.error('Failed to update title:', err);
+      setTitle(page.title); // Revert on error
+      setIsEditingTitle(false);
+    }
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleTitleBlur();
+    } else if (e.key === 'Escape') {
+      setTitle(page?.title || '');
+      setIsEditingTitle(false);
+    }
+  };
+
   const rightPanel = (
     <div className="flex flex-col h-full bg-card/40">
       <div className="p-4 border-b border-border/50 bg-muted/20">
@@ -244,7 +274,24 @@ export default function WikiEditorPage() {
             <div className="flex items-center gap-3">
               <span className="text-3xl">{pageTypeInfo?.icon}</span>
               <div>
-                <h1 className="text-3xl font-bold font-serif">{page.title}</h1>
+                {isEditingTitle ? (
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    onBlur={handleTitleBlur}
+                    onKeyDown={handleTitleKeyDown}
+                    className="text-3xl font-bold font-serif bg-transparent border-b border-border/50 focus:border-primary focus:outline-none"
+                    autoFocus
+                  />
+                ) : (
+                  <h1
+                    className="text-3xl font-bold font-serif cursor-pointer hover:text-primary/80 transition-colors"
+                    onClick={() => setIsEditingTitle(true)}
+                  >
+                    {page.title}
+                  </h1>
+                )}
                 <p className="text-xs text-muted-foreground uppercase tracking-widest">{pageTypeInfo?.label}</p>
               </div>
             </div>

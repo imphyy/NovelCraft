@@ -4,8 +4,11 @@ import { projectsAPI, chaptersAPI } from '../api/client';
 import { RewriteModal } from '../components/RewriteModal';
 import { AppShell } from '../components/layout/AppShell';
 import { EmptyState } from '../components/scaffolding/EmptyState';
-import { Book } from 'lucide-react';
+import { Book, Edit3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Modal, ModalHeader, ModalFooter, ModalCancelButton } from '@/components/ui/modal';
+import { FormField, FormInput, FormError } from '@/components/ui/form-field';
+import { Button } from '@/components/ui/button';
 
 interface Project {
   id: string;
@@ -35,11 +38,19 @@ export default function EditorPage() {
   const [newChapterTitle, setNewChapterTitle] = useState('');
   const [error, setError] = useState('');
   const [showRewriteModal, setShowRewriteModal] = useState(false);
-  const [selectedText] = useState('');
+  const [selectedText, setSelectedText] = useState('');
+  const [selectedTool, setSelectedTool] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleValue, setTitleValue] = useState('');
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lastSavedContent = useRef('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const isUndoRedoRef = useRef(false);
 
   useEffect(() => {
     loadProjectAndChapters();
@@ -48,9 +59,20 @@ export default function EditorPage() {
   useEffect(() => {
     if (selectedChapter) {
       setContent(selectedChapter.content);
+      setTitleValue(selectedChapter.title);
       lastSavedContent.current = selectedChapter.content;
+      // Initialize history with current content
+      setHistory([selectedChapter.content]);
+      setHistoryIndex(0);
     }
   }, [selectedChapter?.id]);
+
+  useEffect(() => {
+    if (editingTitle && titleInputRef.current) {
+      titleInputRef.current.focus();
+      titleInputRef.current.select();
+    }
+  }, [editingTitle]);
 
   useEffect(() => {
     // Autosave logic
@@ -79,8 +101,8 @@ export default function EditorPage() {
         chaptersAPI.list(projectId!),
       ]);
       setProject(projectRes.data);
-      setChapters(chaptersRes.data);
-      if (chaptersRes.data.length > 0) {
+      setChapters(chaptersRes.data || []);
+      if (chaptersRes.data && chaptersRes.data.length > 0) {
         setSelectedChapter(chaptersRes.data[0]);
       }
     } catch (err) {
@@ -130,6 +152,22 @@ export default function EditorPage() {
     }
   };
 
+  const handleTextSelection = () => {
+    if (!textareaRef.current) return;
+
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+    const text = content.substring(start, end);
+
+    setSelectedText(text);
+  };
+
+  const handleRewrite = (tool: string) => {
+    if (!selectedText || !selectedChapter) return;
+    setSelectedTool(tool);
+    setShowRewriteModal(true);
+  };
+
   const handleAcceptRewrite = (newText: string) => {
     if (!textareaRef.current) return;
 
@@ -137,7 +175,95 @@ export default function EditorPage() {
     const end = textareaRef.current.selectionEnd;
 
     const newContent = content.substring(0, start) + newText + content.substring(end);
+    updateContentWithHistory(newContent);
+    setSelectedText('');
+  };
+
+  const updateContentWithHistory = (newContent: string) => {
+    if (isUndoRedoRef.current) {
+      // Don't add to history during undo/redo operations
+      setContent(newContent);
+      return;
+    }
+
+    // Remove any future history if we're not at the end
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(newContent);
+
+    // Limit history to last 100 states
+    if (newHistory.length > 100) {
+      newHistory.shift();
+      setHistoryIndex(99);
+    } else {
+      setHistoryIndex(newHistory.length - 1);
+    }
+
+    setHistory(newHistory);
     setContent(newContent);
+  };
+
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      isUndoRedoRef.current = true;
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      setContent(history[newIndex]);
+      setTimeout(() => {
+        isUndoRedoRef.current = false;
+      }, 0);
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      isUndoRedoRef.current = true;
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      setContent(history[newIndex]);
+      setTimeout(() => {
+        isUndoRedoRef.current = false;
+      }, 0);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+      e.preventDefault();
+      handleUndo();
+    } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+      e.preventDefault();
+      handleRedo();
+    }
+  };
+
+  const handleTitleSave = async () => {
+    if (!selectedChapter || titleValue === selectedChapter.title) {
+      setEditingTitle(false);
+      return;
+    }
+
+    try {
+      await chaptersAPI.update(selectedChapter.id, { title: titleValue });
+      setChapters(chapters.map(ch =>
+        ch.id === selectedChapter.id ? { ...ch, title: titleValue } : ch
+      ));
+      setSelectedChapter({ ...selectedChapter, title: titleValue });
+      setEditingTitle(false);
+    } catch (err) {
+      console.error('Failed to update title:', err);
+      setTitleValue(selectedChapter.title);
+      setEditingTitle(false);
+    }
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleTitleSave();
+    } else if (e.key === 'Escape') {
+      setTitleValue(selectedChapter?.title || '');
+      setEditingTitle(false);
+    }
   };
 
   if (loading) {
@@ -162,44 +288,6 @@ export default function EditorPage() {
           + New
         </button>
       </div>
-
-      {showNewChapter && (
-        <form
-          onSubmit={handleCreateChapter}
-          className="mb-6 p-3 bg-muted/10 rounded border border-border/10"
-        >
-          {error && (
-            <div className="text-[10px] text-destructive mb-2">{error}</div>
-          )}
-          <input
-            type="text"
-            value={newChapterTitle}
-            onChange={(e) => setNewChapterTitle(e.target.value)}
-            placeholder="Chapter title"
-            className="w-full px-2 py-1.5 text-xs border border-border/10 rounded mb-2 bg-transparent focus:outline-none focus:ring-1 focus:ring-primary/30"
-            autoFocus
-          />
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              className="flex-1 px-2 py-1 text-[10px] bg-primary/80 text-primary-foreground rounded hover:opacity-90 transition-opacity uppercase tracking-widest font-semibold"
-            >
-              Create
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowNewChapter(false);
-                setNewChapterTitle('');
-                setError('');
-              }}
-              className="flex-1 px-2 py-1 text-[10px] text-muted-foreground/60 hover:text-foreground transition-colors uppercase tracking-widest font-semibold"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
 
       {chapters.length === 0 ? (
         <div className="py-8 px-2">
@@ -249,25 +337,70 @@ export default function EditorPage() {
     <>
       <AppShell
         title={project?.name}
+        projectId={projectId}
+        selectedText={selectedText}
+        onRewrite={handleRewrite}
         leftContext={leftContext}
         main={
           selectedChapter ? (
             <div className="h-full flex flex-col">
-              <div className="border-b border-border/10 pb-6 mb-10 flex items-baseline justify-between">
-                <h2 className="text-3xl font-semibold text-foreground font-serif tracking-tight">
-                  {selectedChapter.title}
-                </h2>
+              <div className={cn(
+                "border-b pb-6 mb-10 flex items-baseline justify-between transition-all",
+                isEditing ? "border-border/20" : "border-border/10"
+              )}>
+                <div className="flex items-center gap-3 flex-1">
+                  {editingTitle ? (
+                    <input
+                      ref={titleInputRef}
+                      type="text"
+                      value={titleValue}
+                      onChange={(e) => setTitleValue(e.target.value)}
+                      onBlur={handleTitleSave}
+                      onKeyDown={handleTitleKeyDown}
+                      className="text-3xl font-medium text-foreground font-serif tracking-tight bg-transparent border-none focus:outline-none focus:ring-0 w-full"
+                    />
+                  ) : (
+                    <h2
+                      onClick={() => setEditingTitle(true)}
+                      className="text-3xl font-medium text-foreground font-serif tracking-tight cursor-text hover:opacity-80 transition-opacity"
+                    >
+                      {selectedChapter.title}
+                    </h2>
+                  )}
+                  {isEditing && !editingTitle && (
+                    <div className="flex items-center gap-1.5 text-[10px] text-primary/50 uppercase tracking-widest font-semibold bg-primary/5 px-2.5 py-1 rounded-sm">
+                      <Edit3 className="h-2.5 w-2.5" />
+                      <span>Draft</span>
+                    </div>
+                  )}
+                </div>
                 <div className="flex items-center gap-4">
-                  {saving && <span className="text-[10px] text-muted-foreground/40 animate-pulse italic">Saving...</span>}
-                  <span className="text-[10px] text-muted-foreground/30 uppercase tracking-[0.2em]">{selectedChapter.wordCount} words</span>
+                  {saving ? (
+                    <span className="text-[10px] text-primary/60 animate-pulse italic">Autosaving...</span>
+                  ) : content !== lastSavedContent.current ? (
+                    <span className="text-[10px] text-muted-foreground/40 italic">Unsaved</span>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground/40 italic">Saved</span>
+                  )}
+                  <span className="text-[10px] text-muted-foreground/30 uppercase tracking-[0.2em]">~{selectedChapter.wordCount.toLocaleString()} words</span>
                 </div>
               </div>
               <div className="flex-1">
                 <textarea
                   ref={textareaRef}
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="w-full h-[65vh] text-foreground resize-none focus:outline-none bg-transparent font-serif leading-relaxed text-lg md:text-xl placeholder:text-muted-foreground/20 selection:bg-primary/10"
+                  onChange={(e) => updateContentWithHistory(e.target.value)}
+                  onSelect={handleTextSelection}
+                  onFocus={() => setIsEditing(true)}
+                  onBlur={() => setIsEditing(false)}
+                  onKeyDown={handleKeyDown}
+                  className={cn(
+                    "w-full h-[65vh] text-foreground resize-none focus:outline-none bg-transparent font-serif text-lg md:text-xl placeholder:text-muted-foreground/20 selection:bg-primary/10 transition-all caret-primary",
+                    isEditing ? "leading-[1.75]" : "leading-relaxed"
+                  )}
+                  style={{
+                    caretColor: 'hsl(var(--primary))',
+                  }}
                   placeholder="Once upon a time..."
                 />
               </div>
@@ -313,6 +446,45 @@ export default function EditorPage() {
           onAccept={handleAcceptRewrite}
         />
       )}
+
+      {/* Create Chapter Modal */}
+      <Modal open={showNewChapter} onOpenChange={setShowNewChapter}>
+        <ModalHeader
+          title="New Chapter"
+          description="Add a new chapter to your manuscript."
+        />
+        <form onSubmit={handleCreateChapter}>
+          {error && <FormError>{error}</FormError>}
+          <div className="space-y-8">
+            <FormField label="Chapter Title" htmlFor="chapterTitle">
+              <FormInput
+                id="chapterTitle"
+                type="text"
+                required
+                value={newChapterTitle}
+                onChange={(e) => setNewChapterTitle(e.target.value)}
+                placeholder="Chapter 1: The Beginning"
+                serif
+              />
+            </FormField>
+          </div>
+          <ModalFooter>
+            <ModalCancelButton
+              onClick={() => {
+                setShowNewChapter(false);
+                setNewChapterTitle('');
+                setError('');
+              }}
+            />
+            <Button
+              type="submit"
+              className="rounded-none px-10 h-11 text-xs font-semibold uppercase tracking-widest"
+            >
+              Create Chapter
+            </Button>
+          </ModalFooter>
+        </form>
+      </Modal>
     </>
   );
 }

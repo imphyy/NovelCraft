@@ -22,19 +22,25 @@ type Chunk struct {
 
 // ChunkText splits text into overlapping chunks
 func ChunkText(text string) []Chunk {
+	println("DEBUG: [ChunkText] Starting - text length:", len(text), "bytes")
+
 	if text == "" {
+		println("DEBUG: [ChunkText] Empty text, returning empty chunks")
 		return []Chunk{}
 	}
 
 	// Normalize whitespace
+	println("DEBUG: [ChunkText] Normalizing whitespace...")
 	text = strings.TrimSpace(text)
 	text = strings.ReplaceAll(text, "\r\n", "\n")
 
 	var chunks []Chunk
 	textLen := utf8.RuneCountInString(text)
+	println("DEBUG: [ChunkText] Text rune count:", textLen)
 
 	if textLen <= ChunkSize {
 		// Text is small enough to be one chunk
+		println("DEBUG: [ChunkText] Text fits in one chunk")
 		return []Chunk{
 			{
 				Index:   0,
@@ -44,38 +50,52 @@ func ChunkText(text string) []Chunk {
 		}
 	}
 
+	println("DEBUG: [ChunkText] Splitting into multiple chunks...")
 	start := 0
 	index := 0
 
 	for start < textLen {
+		println("DEBUG: [ChunkText] Processing chunk", index, "- start position:", start)
 		end := start + ChunkSize
 		if end > textLen {
 			end = textLen
 		}
 
 		// Try to break at sentence or paragraph boundary
+		println("DEBUG: [ChunkText] Getting substring from", start, "to", end)
 		chunkText := getSubstring(text, start, end)
 
 		// If not at the end, try to break at a good point
 		if end < textLen {
+			println("DEBUG: [ChunkText] Breaking at boundary...")
 			chunkText = breakAtBoundary(chunkText)
 		}
 
 		// Skip if chunk is too small (unless it's the last one)
-		if utf8.RuneCountInString(chunkText) >= MinChunkSize || end >= textLen {
+		chunkLen := utf8.RuneCountInString(chunkText)
+		if chunkLen >= MinChunkSize || end >= textLen {
+			println("DEBUG: [ChunkText] Adding chunk", index, "with", chunkLen, "runes")
 			chunks = append(chunks, Chunk{
 				Index:   index,
 				Content: strings.TrimSpace(chunkText),
 				Tokens:  estimateTokens(chunkText),
 			})
 			index++
+		} else {
+			println("DEBUG: [ChunkText] Skipping chunk (too small):", chunkLen, "runes")
 		}
 
 		// Move start forward, accounting for overlap
 		actualChunkLen := utf8.RuneCountInString(chunkText)
-		start += actualChunkLen - ChunkOverlap
+		advance := actualChunkLen - ChunkOverlap
+		if advance < 1 {
+			advance = 1 // Ensure we always move forward
+		}
+		start += advance
+		println("DEBUG: [ChunkText] Moving start forward to:", start)
 	}
 
+	println("DEBUG: [ChunkText] Completed - total chunks:", len(chunks))
 	return chunks
 }
 

@@ -43,7 +43,7 @@ func NewServer(db *pgxpool.Pool, cfg *config.Config) *echo.Echo {
 	projectsHandler := projects.NewHandler(projectsService)
 
 	// AI services (optional - only if API key is configured)
-	var documentService *ai.DocumentService
+	var documentService chapters.DocumentProcessor
 	var aiHandler *ai.Handler
 	if cfg.OpenAIAPIKey != "" {
 		embeddingsService := ai.NewEmbeddingsService(cfg.OpenAIAPIKey)

@@ -23,8 +23,11 @@ func NewDocumentService(db *pgxpool.Pool, embeddingsService *EmbeddingsService) 
 
 // ProcessDocument chunks and embeds a document
 func (s *DocumentService) ProcessDocument(ctx context.Context, projectID, sourceType, sourceID, content string) error {
+	println("DEBUG: [ProcessDocument] Starting - sourceType:", sourceType, "sourceID:", sourceID)
+
 	// Calculate content hash
 	contentHash := HashContent(content)
+	println("DEBUG: [ProcessDocument] Content hash calculated:", contentHash)
 
 	// Check if document exists and is unchanged
 	var existingHash string
@@ -35,8 +38,10 @@ func (s *DocumentService) ProcessDocument(ctx context.Context, projectID, source
 
 	if err == nil && existingHash == contentHash {
 		// Content unchanged, skip processing
+		println("DEBUG: [ProcessDocument] Content unchanged, skipping")
 		return nil
 	}
+	println("DEBUG: [ProcessDocument] Content changed or new document")
 
 	// Start transaction
 	tx, err := s.db.Begin(ctx)
@@ -44,6 +49,7 @@ func (s *DocumentService) ProcessDocument(ctx context.Context, projectID, source
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer tx.Rollback(ctx)
+	println("DEBUG: [ProcessDocument] Transaction started")
 
 	// Upsert document
 	var documentID string
@@ -57,17 +63,21 @@ func (s *DocumentService) ProcessDocument(ctx context.Context, projectID, source
 	if err != nil {
 		return fmt.Errorf("failed to upsert document: %w", err)
 	}
+	println("DEBUG: [ProcessDocument] Document upserted, ID:", documentID)
 
 	// Delete old chunks
 	_, err = tx.Exec(ctx, `DELETE FROM chunks WHERE document_id = $1`, documentID)
 	if err != nil {
 		return fmt.Errorf("failed to delete old chunks: %w", err)
 	}
+	println("DEBUG: [ProcessDocument] Old chunks deleted")
 
 	// Chunk the content
 	chunks := ChunkText(content)
+	println("DEBUG: [ProcessDocument] Content chunked into", len(chunks), "chunks")
 	if len(chunks) == 0 {
 		// Empty content, just commit and return
+		println("DEBUG: [ProcessDocument] No chunks, committing")
 		return tx.Commit(ctx)
 	}
 
@@ -80,15 +90,21 @@ func (s *DocumentService) ProcessDocument(ctx context.Context, projectID, source
 	// Generate embeddings (if API key is configured)
 	var embeddings [][]float32
 	if s.embeddingsService != nil {
+		println("DEBUG: [ProcessDocument] Generating embeddings for", len(texts), "chunks")
 		embeddings, err = s.embeddingsService.GenerateEmbeddings(ctx, texts)
 		if err != nil {
 			// Log error but don't fail - we can still store chunks without embeddings
 			fmt.Printf("Warning: failed to generate embeddings: %v\n", err)
 			embeddings = make([][]float32, len(chunks))
+		} else {
+			println("DEBUG: [ProcessDocument] Embeddings generated:", len(embeddings))
 		}
+	} else {
+		println("DEBUG: [ProcessDocument] No embeddings service configured")
 	}
 
 	// Insert chunks with embeddings
+	println("DEBUG: [ProcessDocument] Inserting chunks into database")
 	for i, chunk := range chunks {
 		var embedding interface{}
 		if i < len(embeddings) && embeddings[i] != nil {
@@ -104,8 +120,14 @@ func (s *DocumentService) ProcessDocument(ctx context.Context, projectID, source
 			return fmt.Errorf("failed to insert chunk: %w", err)
 		}
 	}
+	println("DEBUG: [ProcessDocument] All chunks inserted")
 
-	return tx.Commit(ctx)
+	err = tx.Commit(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+	println("DEBUG: [ProcessDocument] Transaction committed successfully")
+	return nil
 }
 
 // DeleteDocument removes a document and its chunks

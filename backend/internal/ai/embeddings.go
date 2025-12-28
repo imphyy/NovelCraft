@@ -49,6 +49,8 @@ type embeddingResponse struct {
 
 // GenerateEmbeddings generates embeddings for multiple text chunks
 func (s *EmbeddingsService) GenerateEmbeddings(ctx context.Context, texts []string) ([][]float32, error) {
+	println("DEBUG: [GenerateEmbeddings] Starting - chunk count:", len(texts))
+
 	if len(texts) == 0 {
 		return [][]float32{}, nil
 	}
@@ -67,6 +69,7 @@ func (s *EmbeddingsService) GenerateEmbeddings(ctx context.Context, texts []stri
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
+	println("DEBUG: [GenerateEmbeddings] Request payload size:", len(jsonData), "bytes")
 
 	req, err := http.NewRequestWithContext(ctx, "POST", OpenAIEmbeddingsURL, bytes.NewBuffer(jsonData))
 	if err != nil {
@@ -76,11 +79,14 @@ func (s *EmbeddingsService) GenerateEmbeddings(ctx context.Context, texts []stri
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.apiKey))
 
+	println("DEBUG: [GenerateEmbeddings] Sending request to OpenAI...")
+	startTime := time.Now()
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 	defer resp.Body.Close()
+	println("DEBUG: [GenerateEmbeddings] Received response in", time.Since(startTime).Seconds(), "seconds, status:", resp.StatusCode)
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -91,6 +97,7 @@ func (s *EmbeddingsService) GenerateEmbeddings(ctx context.Context, texts []stri
 	if err := json.NewDecoder(resp.Body).Decode(&embResp); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
+	println("DEBUG: [GenerateEmbeddings] Decoded response, got", len(embResp.Data), "embeddings")
 
 	// Extract embeddings in order
 	embeddings := make([][]float32, len(texts))
@@ -100,6 +107,7 @@ func (s *EmbeddingsService) GenerateEmbeddings(ctx context.Context, texts []stri
 		}
 	}
 
+	println("DEBUG: [GenerateEmbeddings] Successfully generated embeddings")
 	return embeddings, nil
 }
 

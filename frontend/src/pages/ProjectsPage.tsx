@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { projectsAPI } from '../api/client';
 import { Button } from '@/components/ui/button';
 import { AppShell } from '../components/layout/AppShell';
+import { Modal, ModalHeader, ModalFooter, ModalCancelButton } from '@/components/ui/modal';
+import { FormField, FormInput, FormTextarea, FormError } from '@/components/ui/form-field';
 
 interface Project {
   id: string;
@@ -144,78 +146,55 @@ export default function ProjectsPage() {
             </div>
           )}
 
-          {showCreateModal && (
-            <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="bg-card max-w-lg w-full p-12 border border-border/50 shadow-2xl">
-                <div className="mb-10">
-                  <h3 className="text-3xl font-serif text-foreground mb-3">
-                    Begin a New Project
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed italic">
-                    Every great story starts with a single word.
-                  </p>
-                </div>
-                <form onSubmit={handleCreateProject}>
-                  {error && (
-                    <div className="bg-destructive/5 text-destructive text-xs px-4 py-3 border-l-2 border-destructive mb-8">
-                      {error}
-                    </div>
-                  )}
-                  <div className="space-y-8">
-                    <div className="space-y-2">
-                      <label htmlFor="name" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                        Project Name
-                      </label>
-                      <input
-                        id="name"
-                        type="text"
-                        required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full bg-transparent border-b border-border/50 py-2 focus:border-primary focus:outline-none transition-colors placeholder:text-muted-foreground/20 font-serif text-xl"
-                        placeholder="The Great American Novel"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="description" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                        Description
-                      </label>
-                      <textarea
-                        id="description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        rows={3}
-                        className="w-full bg-transparent border border-border/30 p-3 focus:border-primary focus:outline-none transition-colors resize-none placeholder:text-muted-foreground/20 text-sm leading-relaxed"
-                        placeholder="A brief description of your project..."
-                      />
-                    </div>
-                  </div>
-                  <div className="flex justify-end items-center gap-8 mt-12">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowCreateModal(false);
-                        setError('');
-                        setName('');
-                        setDescription('');
-                      }}
-                      className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
-                      disabled={creating}
-                    >
-                      Cancel
-                    </button>
-                    <Button
-                      type="submit"
-                      disabled={creating}
-                      className="rounded-none px-10 h-11 text-xs font-semibold uppercase tracking-widest"
-                    >
-                      {creating ? 'Creating...' : 'Create Project'}
-                    </Button>
-                  </div>
-                </form>
+          <Modal open={showCreateModal} onOpenChange={setShowCreateModal}>
+            <ModalHeader
+              title="Begin a New Project"
+              description="Every great story starts with a single word."
+            />
+            <form onSubmit={handleCreateProject}>
+              {error && <FormError>{error}</FormError>}
+              <div className="space-y-8">
+                <FormField label="Project Name" htmlFor="name">
+                  <FormInput
+                    id="name"
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="The Great American Novel"
+                    serif
+                  />
+                </FormField>
+                <FormField label="Description" htmlFor="description">
+                  <FormTextarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                    placeholder="A brief description of your project..."
+                  />
+                </FormField>
               </div>
-            </div>
-          )}
+              <ModalFooter>
+                <ModalCancelButton
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setError('');
+                    setName('');
+                    setDescription('');
+                  }}
+                  disabled={creating}
+                />
+                <Button
+                  type="submit"
+                  disabled={creating}
+                  className="rounded-none px-10 h-11 text-xs font-semibold uppercase tracking-widest"
+                >
+                  {creating ? 'Creating...' : 'Create Project'}
+                </Button>
+              </ModalFooter>
+            </form>
+          </Modal>
         </div>
       }
     />

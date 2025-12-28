@@ -15,6 +15,13 @@ func main() {
 	// Load config
 	cfg := config.Load()
 
+	// Log AI services status
+	if cfg.OpenAIAPIKey != "" {
+		log.Printf("✓ OpenAI API key configured (AI features enabled)")
+	} else {
+		log.Printf("✗ OpenAI API key not configured (AI features disabled)")
+	}
+
 	// Connect to database
 	dbPool, err := db.Connect(ctx, cfg.DatabaseURL)
 	if err != nil {

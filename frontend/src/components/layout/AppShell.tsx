@@ -5,6 +5,7 @@ import { RightSidebar } from './RightSidebar';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { PageMargin, PaperSheet } from './PaperSheet';
+import type { RewriteTool } from '@/types/ai';
 
 interface AppShellProps {
   header?: ReactNode;
@@ -15,6 +16,9 @@ interface AppShellProps {
   hideLeft?: boolean;
   hideRight?: boolean;
   title?: string;
+  projectId?: string;
+  selectedText?: string;
+  onRewrite?: (tool: RewriteTool) => void;
 }
 
 export function AppShell({
@@ -26,6 +30,9 @@ export function AppShell({
   hideLeft = false,
   hideRight = false,
   title,
+  projectId,
+  selectedText,
+  onRewrite,
 }: AppShellProps) {
   const [isLeftOpen, setIsLeftOpen] = useState(false);
   const [isRightOpen, setIsRightOpen] = useState(false);
@@ -70,7 +77,7 @@ export function AppShell({
         {/* Desktop Right Sidebar */}
         {!hideRight && (
           <aside className="hidden lg:flex w-[400px] flex-col shrink-0">
-            {rightPanel || <RightSidebar />}
+            {rightPanel || <RightSidebar projectId={projectId} selectedText={selectedText} onRewrite={onRewrite} />}
           </aside>
         )}
 
@@ -78,7 +85,7 @@ export function AppShell({
         <Dialog open={isRightOpen} onOpenChange={setIsRightOpen}>
           <DialogContent className="fixed right-0 top-0 bottom-0 w-[320px] p-0 h-full translate-x-0 translate-y-0 rounded-none border-l border-border/10 sm:rounded-none left-auto outline-none">
              <div className="h-full pt-14 bg-muted/20">
-                {rightPanel || <RightSidebar />}
+                {rightPanel || <RightSidebar projectId={projectId} selectedText={selectedText} onRewrite={onRewrite} />}
              </div>
           </DialogContent>
         </Dialog>
